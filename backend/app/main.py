@@ -71,6 +71,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             yield
 
     application = FastAPI(title="银铃守护 API", version="1.0.0", lifespan=lifespan)
+    application.state.settings = settings
     register_handlers(application)
     application.add_middleware(
         CORSMiddleware,

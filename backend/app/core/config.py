@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     database_url: str = "postgresql+asyncpg://postgres@127.0.0.1:5432/silver_bell"
     redis_url: str = "redis://127.0.0.1:6379/0"
     jwt_secret: SecretStr = SecretStr("")
-    jwt_alg: str = "HS256"
+    jwt_alg: Literal["HS256"] = "HS256"
     access_token_expire_min: int = Field(default=30, gt=0)
     refresh_token_expire_day: int = Field(default=7, gt=0)
     minio_endpoint: str = "127.0.0.1:9000"

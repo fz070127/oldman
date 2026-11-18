@@ -1,15 +1,17 @@
 """Populate the development database. Run with python -m app.db.seed."""
 
+import argparse
 import asyncio
 import random
 import secrets
 from datetime import date, datetime, time, timedelta, timezone
 
 import bcrypt
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.core.permissions import ROLE_PERMISSIONS
 from app.db.session import get_engine
 from app.models import (
     Alarm,
@@ -40,18 +42,13 @@ CHINA = timezone(timedelta(hours=8))
 COMMUNITIES = ("幸福里社区", "安康苑", "长乐新村", "夕阳红家园", "康宁小区")
 SURNAMES = "王李张刘陈杨黄赵吴周"
 GIVEN_NAMES = ("秀兰", "建国", "桂芳", "志强", "玉梅", "国平", "淑芬", "德明", "春华", "永安")
-ROLES = {
-    RoleCode.ADMIN: ("超级管理员", ["*"]),
-    RoleCode.COMMUNITY_ADMIN: (
-        "社区管理员",
-        ["elder:read", "elder:write", "device:*", "event:*", "alarm:*", "dashboard:*"],
-    ),
-    RoleCode.GUARDIAN: (
-        "网格员",
-        ["elder:read", "event:read", "alarm:read", "alarm:ack", "alarm:dispatch"],
-    ),
-    RoleCode.FAMILY: ("家属", ["family:read", "alarm:ack"]),
-    RoleCode.VIEWER: ("只读用户", ["dashboard:read"]),
+HISTORY_SEED = 42
+ROLE_NAMES = {
+    RoleCode.ADMIN: "超级管理员",
+    RoleCode.COMMUNITY_ADMIN: "社区管理员",
+    RoleCode.GUARDIAN: "网格员",
+    RoleCode.FAMILY: "家属",
+    RoleCode.VIEWER: "只读用户",
 }
 STATUS_COUNTS = {
     AlarmStatus.PENDING: 25,
@@ -82,8 +79,8 @@ async def seed_directory(session, now):
         session,
         Role,
         [
-            {"id": code, "code": code, "name": name, "permissions": permissions}
-            for code, (name, permissions) in ROLES.items()
+            {"id": code, "code": code, "name": name, "permissions": list(ROLE_PERMISSIONS[code])}
+            for code, name in ROLE_NAMES.items()
         ],
     )
     await insert_missing(
@@ -231,7 +228,7 @@ def shuffled(rng, counts):
 
 
 def build_history(now):
-    rng = random.Random(42)
+    rng = random.Random(HISTORY_SEED)
     statuses = shuffled(rng, STATUS_COUNTS)
     types = shuffled(rng, {EventType.FALL: 400, EventType.LONG_LIE: 100})
     levels = shuffled(rng, {EventLevel.P0: 50, EventLevel.P1: 150, EventLevel.P2: 300})
@@ -376,15 +373,45 @@ async def seed(session: AsyncSession):
     return len(new_alarms)
 
 
-async def main():
+async def refresh_pending(session: AsyncSession) -> int:
+    """Refresh only seeded alarms that are still pending."""
+    statuses = shuffled(random.Random(HISTORY_SEED), STATUS_COUNTS)
+    demo_ids = [f"A{i:04}" for i, status in enumerate(statuses, 1) if status == AlarmStatus.PENDING]
+    alarms = (
+        await session.execute(
+            select(Alarm.id, Alarm.created_at, Alarm.notified_at)
+            .where(Alarm.id.in_(demo_ids), Alarm.status == AlarmStatus.PENDING)
+            .order_by(Alarm.id)
+            .with_for_update()
+        )
+    ).all()
+    now = datetime.now(CHINA).replace(microsecond=0)
+    oldest, newest = now - timedelta(seconds=50), now - timedelta(seconds=1)
+    if all(created == notified and oldest <= created <= newest for _, created, notified in alarms):
+        return 0
+
+    values = []
+    for offset, (alarm_id, _, _) in enumerate(alarms, 1):
+        timestamp = now - timedelta(seconds=offset)
+        values.append({"id": alarm_id, "created_at": timestamp, "notified_at": timestamp})
+    await session.execute(update(Alarm), values)
+    return len(values)
+
+
+async def main(refresh: bool = False):
     engine = get_engine()
     try:
         async with async_sessionmaker(engine).begin() as session:
-            count = await seed(session)
-        print(f"Seed complete: {count} new alarms.")
+            count = await (refresh_pending(session) if refresh else seed(session))
+        if refresh:
+            print(f"Refresh complete: {count} demo PENDING alarms updated.")
+        else:
+            print(f"Seed complete: {count} new alarms.")
     finally:
         await engine.dispose()
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--refresh-pending", action="store_true", help="刷新演示待确认告警的时间")
+    asyncio.run(main(parser.parse_args().refresh_pending))

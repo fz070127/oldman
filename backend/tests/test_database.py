@@ -11,12 +11,12 @@ import bcrypt
 import pytest
 from alembic.config import Config
 from fastapi import FastAPI, Request
-from sqlalchemy import func, inspect, select, text
+from sqlalchemy import func, inspect, select, text, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from alembic import command
-from app.db.seed import CHINA, seed
+from app.db.seed import CHINA, refresh_pending, seed
 from app.db.session import get_db
 from app.models import Alarm, AlarmAction, Base, Device, Elder, Event, User
 
@@ -228,3 +228,36 @@ async def test_seed_distribution_and_idempotence(migrated):
                 assert alarm.response_sec is None
             if alarm.status in ("RESOLVED", "FALSE_POSITIVE"):
                 assert timeline[alarm.id] == ["NOTIFY", "ACK", "RESOLVE"]
+
+    async with factory.begin() as session:
+        other_alarm = await session.scalar(
+            select(Alarm.id).where(Alarm.status == "RESOLVED").order_by(Alarm.id).limit(1)
+        )
+        stale = now - timedelta(minutes=20)
+        await session.execute(
+            update(Alarm)
+            .where((Alarm.status == "PENDING") | (Alarm.id == other_alarm))
+            .values(status="PENDING", created_at=stale, notified_at=stale)
+        )
+        query = select(Alarm.__table__).order_by(Alarm.id)
+        before = (await session.execute(query)).mappings().all()
+        assert await refresh_pending(session) == 25
+        after = (await session.execute(query)).mappings().all()
+        refreshed = 0
+        now = await session.scalar(select(func.clock_timestamp()))
+        for old, new in zip(before, after, strict=True):
+            if old["status"] == "PENDING" and old["id"] != other_alarm:
+                refreshed += 1
+                assert new["created_at"] == new["notified_at"]
+                assert timedelta(seconds=1) <= now - new["created_at"] < timedelta(seconds=51)
+                assert dict(new) == {
+                    **old,
+                    "created_at": new["created_at"],
+                    "notified_at": new["notified_at"],
+                }
+            else:
+                assert old == new
+        assert refreshed == 25
+        assert await refresh_pending(session) == 0
+        assert (await session.execute(query)).mappings().all() == after
+    assert await table_counts(migrated) == counts

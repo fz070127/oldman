@@ -1,16 +1,17 @@
 # 银铃守护 API
 
-运行环境为 Python 3.11。健康检查使用 PostgreSQL 16 和 Redis 7，分别执行 `SELECT 1` 和 `PING`。两项检查并行执行，各自的等待上限为 2 秒。服务启动时只创建连接池和客户端，因此也可以在依赖离线时启动。
+支持 Python 3.11 和 3.12。健康检查使用 PostgreSQL 16 和 Redis 7，分别执行 `SELECT 1` 和 `PING`。两项检查并行执行，各自的等待上限为 2 秒。服务启动时只创建连接池和客户端，因此也可以在依赖离线时启动。
 
 ## 本地运行
 
-在 PowerShell 进入后端目录并创建虚拟环境。若 Python 3.11 未注册到 Windows 启动器，第一条 Python 命令可换成该解释器的完整路径。
+在 PowerShell 进入后端目录并创建虚拟环境。若 Python 3.12 未注册到 Windows 启动器，第一条 Python 命令可换成该解释器的完整路径。
 
 ```powershell
-Set-Location 'F:\独居老人\backend'
-py -3.11 -m venv .venv
+Set-Location backend
+py -3.12 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -e .
 Copy-Item .env.example .env
+$env:JWT_SECRET = .\.venv\Scripts\python.exe -c "import secrets; print(secrets.token_urlsafe(32))"
 .\.venv\Scripts\python.exe -m uvicorn app.main:app --reload
 ```
 
@@ -25,6 +26,7 @@ curl.exe -i http://localhost:8000/health
 curl.exe -i http://localhost:8000/api/v1/missing
 .\.venv\Scripts\python.exe -m pytest -q
 .\.venv\Scripts\ruff.exe check .
+.\.venv\Scripts\ruff.exe format --check .
 ```
 
 - 健康检查返回 HTTP 200 和 `code=0`。两个依赖均连通时，`data` 为 `{"status":"up","db":"up","redis":"up"}`。离线的依赖显示 `down`，整体 `status` 仍为 `up`。
@@ -33,7 +35,7 @@ curl.exe -i http://localhost:8000/api/v1/missing
 
 ## PostgreSQL 数据层（M2）
 
-在后端目录激活 Python 3.11 虚拟环境，确保 `DATABASE_URL` 指向已创建的开发库（连接串使用 `postgresql+asyncpg://`），然后执行：
+在后端目录激活虚拟环境，确保 `DATABASE_URL` 指向已创建的开发库（连接串使用 `postgresql+asyncpg://`），然后执行：
 
 ```powershell
 python -m alembic upgrade head
@@ -44,7 +46,15 @@ python -m app.db.seed
 
 初始迁移为 `0001`，包含 12 张业务表。空库的两次 seed 分别输出新增 500、0 条告警。46 个联调账号的密码均为 `123456`，使用 bcrypt 独立加盐；另外一条禁用的 `SYSTEM` 记录用于系统处置流水的外键。事件时间、设备心跳和 PENDING 倒计时均以首次填充时刻为基准，重跑保留已有处置记录。100 位老人中，5 位在册和 5 位暂停老人没有设备，另有 5 位绑定离线设备。
 
-设置 `TEST_DATABASE_URL` 后运行 `python -m pytest -q` 可执行数据库集成测试。测试账号需要在测试库创建 schema 的权限，每个测试在独立 schema 内执行，结束时回滚。未配置该变量时 pytest 会跳过数据库集成测试。若需手工演练回滚，先将 `DATABASE_URL` 指向一次性验收库，再运行 `python -m alembic downgrade base`，该命令会删除 12 张业务表及其数据。
+演示前运行 `python -m app.db.seed --refresh-pending`。命令将仍为 PENDING 的演示告警的 `created_at` 和 `notified_at` 设置为当前时间前 1～50 秒。同批告警仍在窗口内时重复执行会更新 0 条。已处置告警及其他业务数据保留原值。
+
+设置 `TEST_DATABASE_URL` 后运行 `python -m pytest -q` 可执行数据库集成测试。测试账号需要在测试库创建 schema 的权限，每个测试使用独立 schema 并在结束时清理。未配置该变量时 pytest 会跳过数据库集成测试。若需手工演练回滚，先将 `DATABASE_URL` 指向一次性验收库，再运行 `python -m alembic downgrade base`，该命令会删除 12 张业务表及其数据。
+
+## 认证与权限（M3）
+
+将生成的 `JWT_SECRET` 保存在本地 `.env` 或部署环境中，以便重启后继续验证同一批令牌。访问受保护接口时发送 `Authorization: Bearer <accessToken>`。刷新接口接收 `refreshToken`，返回新的令牌对。登出使用访问令牌，同时撤销它对应的刷新令牌。
+
+Redis 离线时，`/health` 显示 `redis=down`，认证仍验证签名、有效期和账号状态。该期间跳过登录锁定及令牌黑名单，日志记录 `auth_redis_degraded`。设置 `TEST_REDIS_URL` 和 `TEST_DATABASE_URL` 后可验证 Redis 在线时的登录锁定、刷新轮换和登出撤销。
 
 ## 容器运行
 

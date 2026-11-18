@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
-router = APIRouter(prefix="/api/v1")
+from app.api.v1.auth import router as auth_router
 
-# 认证、老人、设备、事件、告警等模块后续通过 router.include_router 挂到此前缀。
+router = APIRouter(prefix="/api/v1")
+router.include_router(auth_router)

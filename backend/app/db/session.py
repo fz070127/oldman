@@ -18,12 +18,16 @@ def get_engine() -> AsyncEngine:
     return create_async_engine(Settings().database_url, pool_pre_ping=True)
 
 
-async def get_db(request: Request) -> AsyncIterator[AsyncSession]:
-    """Bind requests to the existing lifespan-owned engine, including in test apps."""
+def get_sessionmaker(request: Request) -> async_sessionmaker[AsyncSession]:
     state = request.app.state
     engine = state.db
     factory = getattr(state, "db_sessionmaker", None)
     if factory is None or factory.kw["bind"] is not engine:
         factory = state.db_sessionmaker = async_sessionmaker(engine, expire_on_commit=False)
-    async with factory() as session:
+    return factory
+
+
+async def get_db(request: Request) -> AsyncIterator[AsyncSession]:
+    """Bind requests to the existing lifespan-owned engine, including in test apps."""
+    async with get_sessionmaker(request)() as session:
         yield session
