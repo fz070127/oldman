@@ -11,9 +11,15 @@ import type { LoginResult } from '@/types/user'
 
 const baseURL = import.meta.env.VITE_API_BASE || '/api'
 
-/** 标记该请求是否已因 1002 重放过，防止死循环 */
+/** 标记该请求是否已因 1002 重放过，以及是否静默错误提示（由调用方自行处理友好提示） */
 interface RetryableConfig extends InternalAxiosRequestConfig {
   _retried?: boolean
+  silentError?: boolean
+}
+
+export interface RequestConfig extends AxiosRequestConfig {
+  /** 为 true 时，响应拦截器不弹默认红色 ElMessage.error，交由业务侧自定义提示 */
+  silentError?: boolean
 }
 
 /** 无需鉴权 / 不参与刷新逻辑的接口 */
@@ -102,17 +108,22 @@ service.interceptors.response.use(
       }
     }
 
-    ElMessage.error(res.message || '请求失败')
+    if (!config.silentError) {
+      ElMessage.error(res.message || '请求失败')
+    }
     return Promise.reject(res)
   },
   (error: AxiosError<ApiResult<unknown>>) => {
     if (axios.isCancel(error)) return Promise.reject(error)
-    if (!error.response) {
-      // 无响应：断网 / 超时 / 跨域等
-      ElMessage.error('网络异常，请稍后重试')
-    } else {
-      // 有响应但 HTTP 非 2xx（契约中仅未捕获异常会返回 500）
-      ElMessage.error(error.response.data?.message || `服务器错误（HTTP ${error.response.status}）`)
+    const cfg = error.config as RetryableConfig | undefined
+    if (!cfg?.silentError) {
+      if (!error.response) {
+        // 无响应：断网 / 超时 / 跨域等
+        ElMessage.error('网络异常，请稍后重试')
+      } else {
+        // 有响应但 HTTP 非 2xx（契约中仅未捕获异常会返回 500）
+        ElMessage.error(error.response.data?.message || `服务器错误（HTTP ${error.response.status}）`)
+      }
     }
     return Promise.reject(error)
   },
@@ -122,7 +133,7 @@ service.interceptors.response.use(
  * 类型安全的请求函数：返回值即契约中的 data 本身
  * @example const me = await request<UserInfo>({ url: '/auth/me' })
  */
-export function request<T = unknown>(config: AxiosRequestConfig): Promise<T> {
+export function request<T = unknown>(config: RequestConfig): Promise<T> {
   return service.request(config) as unknown as Promise<T>
 }
 

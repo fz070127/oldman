@@ -30,14 +30,28 @@ export const asyncRoutes: RouteRecordRaw[] = [
   {
     path: 'elder',
     name: 'Elder',
-    component: Placeholder,
+    alias: ['elder/list'],
+    component: () => import('@/views/elder/list.vue'),
     meta: { title: '老人档案', icon: markRaw(User), menuKey: 'elder', permission: 'elder:read' },
+  },
+  {
+    path: 'elder/detail/:id',
+    name: 'ElderDetail',
+    component: () => import('@/views/elder/detail.vue'),
+    meta: { title: '老人详情', menuKey: 'elder', permission: 'elder:read', hidden: true },
   },
   {
     path: 'device',
     name: 'Device',
-    component: Placeholder,
+    alias: ['device/list'],
+    component: () => import('@/views/device/list.vue'),
     meta: { title: '设备管理', icon: markRaw(Monitor), menuKey: 'device', permission: 'device:read' },
+  },
+  {
+    path: 'device/detail/:id',
+    name: 'DeviceDetail',
+    component: () => import('@/views/device/detail.vue'),
+    meta: { title: '设备详情', menuKey: 'device', permission: 'device:read', hidden: true },
   },
   {
     path: 'event',

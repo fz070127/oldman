@@ -53,7 +53,11 @@ const menuRoutes = computed(() => {
   return asyncRoutes.filter((r) => r.meta?.menuKey && menuSet.has(r.meta.menuKey) && !r.meta?.hidden)
 })
 
-const activeMenu = computed(() => route.path)
+const activeMenu = computed(() => {
+  if (route.path.startsWith('/elder')) return '/elder'
+  if (route.path.startsWith('/device')) return '/device'
+  return route.path
+})
 </script>
 
 <style scoped lang="scss">
