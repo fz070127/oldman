@@ -14,6 +14,7 @@ import {
   COMMUNITIES,
   GUARDIANS,
   buildElderDetail,
+  devicesStore,
   eldersStore,
   eventsStore,
 } from './_data'
@@ -37,6 +38,7 @@ interface MockReq<B = unknown> {
 }
 
 function toElderListItem(r: (typeof eldersStore)[number]): Elder {
+  const hasDevice = devicesStore.some((d) => d.elderId === r.id)
   return {
     id: r.id,
     name: r.name,
@@ -54,6 +56,7 @@ function toElderListItem(r: (typeof eldersStore)[number]): Elder {
     detectMode: r.detectMode,
     status: r.status,
     deviceOnline: r.deviceOnline,
+    hasDevice,
     lastAlarmAt: r.lastAlarmAt,
     alarmCount30d: r.alarmCount30d,
     createdAt: r.createdAt,
@@ -120,7 +123,19 @@ export default [
     },
   },
 
-  // 绑定家属
+  // 获取老人绑定家属列表（F4 补充）
+  {
+    url: `${BASE}/elders/:id/bindings`,
+    method: 'get',
+    response: ({ url }: MockReq) => {
+      const id = extractPathParam(url, /\/elders\/([^/]+)\/bindings/)
+      const elder = eldersStore.find((e) => e.id === id)
+      if (!elder) return resultError(ResultCode.NOT_FOUND, '老人档案不存在')
+      return resultSuccess({ list: elder.families })
+    },
+  },
+
+  // 绑定家属（同时兼容 /families 与 /bindings）
   {
     url: `${BASE}/elders/:id/families`,
     method: 'post',
@@ -150,14 +165,60 @@ export default [
       return resultSuccess(binding)
     },
   },
+  {
+    url: `${BASE}/elders/:id/bindings`,
+    method: 'post',
+    response: ({ url, body }: MockReq<BindFamilyParams>) => {
+      const id = extractPathParam(url, /\/elders\/([^/]+)\/bindings/)
+      const elder = eldersStore.find((e) => e.id === id)
+      if (!elder) return resultError(ResultCode.NOT_FOUND, '老人档案不存在')
+      if (!body?.name || !body?.phone) {
+        return resultError(ResultCode.PARAM_ERROR, '家属姓名和手机号不能为空')
+      }
 
-  // 解绑家属
+      const binding = {
+        bindingId: `B${Date.now().toString().slice(-6)}`,
+        userId: body.userId || `U${Date.now().toString().slice(-4)}`,
+        name: body.name,
+        phone: maskPhone(body.phone),
+        relation: body.relation || '子女',
+        isPrimary: !!body.isPrimary,
+        notifyOrder: body.notifyOrder || elder.families.length + 1,
+      }
+      if (binding.isPrimary) {
+        elder.families.forEach((f) => {
+          f.isPrimary = false
+        })
+      }
+      elder.families.push(binding)
+      return resultSuccess(binding)
+    },
+  },
+
+  // 解绑家属（同时兼容 /families/:bindingId 与 /bindings/:bindingId）
   {
     url: `${BASE}/elders/:id/families/:bindingId`,
     method: 'delete',
     response: ({ url }: MockReq) => {
       const pathname = url.split('?')[0]
       const matched = pathname.match(/\/elders\/([^/]+)\/families\/([^/]+)/)
+      if (!matched) return resultError(ResultCode.PARAM_ERROR, '参数错误')
+      const [, id, bindingId] = matched
+      const elder = eldersStore.find((e) => e.id === id)
+      if (!elder) return resultError(ResultCode.NOT_FOUND, '老人档案不存在')
+
+      const idx = elder.families.findIndex((f) => f.bindingId === bindingId)
+      if (idx < 0) return resultError(ResultCode.NOT_FOUND, '绑定关系不存在')
+      elder.families.splice(idx, 1)
+      return resultSuccess(null)
+    },
+  },
+  {
+    url: `${BASE}/elders/:id/bindings/:bindingId`,
+    method: 'delete',
+    response: ({ url }: MockReq) => {
+      const pathname = url.split('?')[0]
+      const matched = pathname.match(/\/elders\/([^/]+)\/bindings\/([^/]+)/)
       if (!matched) return resultError(ResultCode.PARAM_ERROR, '参数错误')
       const [, id, bindingId] = matched
       const elder = eldersStore.find((e) => e.id === id)
@@ -269,7 +330,7 @@ export default [
     },
   },
 
-  // 逻辑删除老人（status=3 离世）
+  // 软删除/停用老人（status=2 暂停）
   {
     url: `${BASE}/elders/:id`,
     method: 'delete',
@@ -277,7 +338,7 @@ export default [
       const id = extractPathParam(url, /\/elders\/([^/]+)$/)
       const elder = eldersStore.find((e) => e.id === id)
       if (!elder) return resultError(ResultCode.NOT_FOUND, '老人档案不存在')
-      elder.status = ElderStatus.DECEASED
+      elder.status = ElderStatus.PAUSED
       return resultSuccess(null)
     },
   },

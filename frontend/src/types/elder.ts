@@ -73,6 +73,8 @@ export interface Elder {
   detectMode: DetectMode
   status: ElderStatus
   deviceOnline: boolean
+  /** 是否已绑定设备（用于区分“设备离线”与“无设备”） */
+  hasDevice?: boolean
   lastAlarmAt: string | null
   alarmCount30d: number
   createdAt: string

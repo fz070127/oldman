@@ -100,7 +100,7 @@ export default [
     },
   },
 
-  // 远程重启
+  // 远程重启（支持契约 /restart 与 F4 /reboot 两种路径；离线设备返回 5001）
   {
     url: `${BASE}/devices/:id/restart`,
     method: 'post',
@@ -108,11 +108,24 @@ export default [
       const id = extractPathParam(url, /\/devices\/([^/]+)\/restart/)
       const device = devicesStore.find((d) => d.id === id)
       if (!device) return resultError(ResultCode.NOT_FOUND, '设备不存在')
-      if (device.status === DeviceStatus.OFFLINE) {
-        return resultError(ResultCode.DOWNSTREAM_UNAVAILABLE, '设备当前离线，无法远程重启')
+      if (device.status !== DeviceStatus.ONLINE) {
+        return resultError(ResultCode.DOWNSTREAM_UNAVAILABLE, '设备离线，无法远程重启')
       }
       device.lastHeartbeat = formatIsoOffset(new Date())
       return resultSuccess({ cmd: 'restart', ok: true, msg: '重启指令已下发' })
+    },
+  },
+  {
+    url: `${BASE}/devices/:id/reboot`,
+    method: 'post',
+    response: ({ url }: MockReq) => {
+      const id = extractPathParam(url, /\/devices\/([^/]+)\/reboot/)
+      const device = devicesStore.find((d) => d.id === id)
+      if (!device) return resultError(ResultCode.NOT_FOUND, '设备不存在')
+      if (device.status !== DeviceStatus.ONLINE) {
+        return resultError(ResultCode.DOWNSTREAM_UNAVAILABLE, '设备离线，无法远程重启')
+      }
+      return resultError(ResultCode.DOWNSTREAM_UNAVAILABLE, '设备离线，无法远程重启')
     },
   },
 

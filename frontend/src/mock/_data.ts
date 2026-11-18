@@ -239,16 +239,24 @@ function buildElders(): ElderRecord[] {
 // 边界态：老人 E096~E100（索引 95..99）共 5 条无绑定设备；前 5 条离线设备绑定到老人，保证 ≥5 位老人设备离线
 
 function buildDeviceConfig(): DeviceConfig {
+  const rx = randFloat(0.05, 0.14)
+  const ry = randFloat(0.1, 0.18)
+  const rw = randFloat(0.74, 0.84)
+  const rh = randFloat(0.7, 0.78)
   return {
     roi: [
-      [randFloat(0.05, 0.15), randFloat(0.1, 0.2)],
-      [randFloat(0.85, 0.95), randFloat(0.1, 0.2)],
-      [randFloat(0.85, 0.95), randFloat(0.88, 0.96)],
-      [randFloat(0.05, 0.15), randFloat(0.88, 0.96)],
+      [rx, ry],
+      [Number((rx + rw).toFixed(2)), ry],
+      [Number((rx + rw).toFixed(2)), Number((ry + rh).toFixed(2))],
+      [rx, Number((ry + rh).toFixed(2))],
     ],
     furniture: [
       {
         type: FurnitureType.BED,
+        x: 0.58,
+        y: 0.28,
+        w: 0.36,
+        h: 0.5,
         points: [
           [0.58, 0.28],
           [0.94, 0.28],
@@ -258,6 +266,10 @@ function buildDeviceConfig(): DeviceConfig {
       },
       {
         type: FurnitureType.CHAIR,
+        x: 0.12,
+        y: 0.55,
+        w: 0.16,
+        h: 0.21,
         points: [
           [0.12, 0.55],
           [0.28, 0.55],
@@ -302,7 +314,12 @@ function buildDevices(eldersList: ElderRecord[]): Device[] {
 
     let lastHeartbeat: string | null = null
     if (status === DeviceStatus.ONLINE) {
-      lastHeartbeat = formatIsoOffset(now.subtract(randInt(5, 55), 'second'))
+      // 保留 2 台状态为「在线」但心跳超过 5 分钟的设备（索引 2、3），用于展示心跳延迟标红提示
+      if (i === 2 || i === 3) {
+        lastHeartbeat = formatIsoOffset(now.subtract(randInt(8, 25), 'minute'))
+      } else {
+        lastHeartbeat = formatIsoOffset(now.subtract(randInt(5, 55), 'second'))
+      }
     } else if (status === DeviceStatus.OFFLINE) {
       lastHeartbeat = formatIsoOffset(now.subtract(randInt(120, 4320), 'minute'))
     } else if (status === DeviceStatus.FAULT) {

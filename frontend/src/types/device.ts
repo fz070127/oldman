@@ -31,6 +31,14 @@ export type DeviceCmd = (typeof DeviceCmd)[keyof typeof DeviceCmd]
 /** 归一化二维坐标点 [x, y]，取值 0~1 */
 export type NormalizedPoint = [number, number]
 
+/** 归一化矩形 {x, y, w, h}，取值 0~1 */
+export interface NormalizedRect {
+  x: number
+  y: number
+  w: number
+  h: number
+}
+
 /** 家具区域类型 */
 export const FurnitureType = {
   BED: 'bed',
@@ -40,15 +48,19 @@ export const FurnitureType = {
 } as const
 export type FurnitureType = (typeof FurnitureType)[keyof typeof FurnitureType]
 
-/** 家具抑制区域（契约 3.5） */
+/** 家具抑制区域（兼容契约 3.5 多边形 points 与 F4 矩形 x/y/w/h） */
 export interface FurnitureZone {
   type: FurnitureType
-  points: NormalizedPoint[]
+  points?: NormalizedPoint[]
+  x?: number
+  y?: number
+  w?: number
+  h?: number
 }
 
-/** 设备配置（PUT /devices/{id}/config 请求体及 device.config 字段） */
+/** 设备配置（PUT /devices/{id}/config 请求体及 device.config 字段，兼容多边形与矩形） */
 export interface DeviceConfig {
-  roi: NormalizedPoint[]
+  roi: NormalizedPoint[] | NormalizedRect[]
   furniture: FurnitureZone[]
   sensitivity: number
   quietHours: string[]
