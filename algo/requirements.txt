@@ -1,0 +1,8 @@
+opencv-python
+numpy
+pandas
+tqdm
+pyyaml
+imageio[ffmpeg]
+ultralytics>=8.3,<9
+torch>=2.2

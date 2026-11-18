@@ -1,0 +1,35 @@
+# 逐段看过 ADL 预览后填入。每个序列一行，每行只有一个动作。
+#
+# 可选值：
+#   sit    坐下
+#   lie    躺下
+#   bend   弯腰拾物
+#   squat  蹲下
+#   walk   行走/站立（非易混淆，可不填）
+#
+# ── 填写方法（半天可完成，零外部依赖，直接产出误报率分母）──
+# 1. cd algo && python scripts/preview.py --seq adl-01   （逐段生成 mp4）
+# 2. 看视频，判断这段主要是哪种动作
+# 3. 在本文件按 `adl-xx: sit` 格式补一行
+# 4. 全部填完后运行：python scripts/make_hard_negatives.py
+#    会生成 data/labels/hard_negative.csv，供难负样本评测使用
+#
+# ── 为什么这件事最优先 ──
+# UR Fall 的 40 段 ADL 是文件夹级粗标注，坐/躺/蹲/弯腰全混在 adl-xx 里。
+# 不细分，就永远回答不了"坐下误报率是多少"——而这正是答辩必问的问题。
+#
+# ── 参考：SisFall 的 ADL 分类体系（用于统一我们的标签语义）──
+# 来源：Sucerguia, López, Vargas-Bonilla, "SisFall: A Fall and Movement Dataset",
+#       Sensors 2017, 17(1):198, DOI 10.3390/s17010198，表 2 原文
+#   D07/D08  在中等高度椅子上坐下、停留、再站起（慢/快）
+#   D09/D10  在低矮椅子上坐下、停留、再站起（慢/快）
+#   D11      坐着时尝试起身，跌坐回椅子
+#   D12/D13  坐着后缓慢/快速躺下，再起身
+#   D15      站立，缓慢屈膝下蹲，再起身
+#   D16      站立，不屈膝缓慢弯腰，再起身
+#   D18      行走时踉跄（near-fall，本研究中最需要单独标注的一类）
+# 我们的 confusable_type 取值与之对齐：sit / lie / bend / squat / stumble
+
+# ── 填写区（每行 `adl-xx: 动作`，未查看的留空）──
+# adl-01: sit
+# adl-02: lie
