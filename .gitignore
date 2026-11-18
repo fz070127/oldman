@@ -1,0 +1,60 @@
+# ---------- 数据集（4.3GB，不入库） ----------
+# UR Fall 原始帧序列放在 sumanpunshi/，体积过大且属于第三方数据，
+# 需自行获取，本地保留即可。
+sumanpunshi/
+
+# ---------- 项目过程文档（不入库） ----------
+# 需求、架构、契约、分工、派单、提示词、验收报告与调研资料
+# 只在本地维护，不随代码发布。
+docs/
+research/
+
+# 算法产物（可重新生成的中间文件）
+algo/data/processed/
+algo/data/raw/
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ---------- Node ----------
+node_modules/
+dist/
+dist-ssr/
+*.local
+.eslintcache
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ---------- 环境变量与密钥 ----------
+.env
+.env.*.local
+!.env.example
+!.env.development
+!.env.production
+
+# ---------- 编辑器与系统 ----------
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*~
+***REMOVED***
+
+# ---------- 日志与临时文件 ----------
+*.log
+logs/
+tmp/
+.cache/
