@@ -62,7 +62,7 @@
 
         <!-- 健康标签：最多显示 3 个，超出显示 +N -->
         <template #healthTags="{ row }">
-          <template v-if="row.healthTags && row.healthTags.length">
+          <div v-if="row.healthTags && row.healthTags.length" class="tag-cell">
             <el-tag
               v-for="tag in row.healthTags.slice(0, 3)"
               :key="tag"
@@ -75,7 +75,7 @@
             <el-tag v-if="row.healthTags.length > 3" size="small" type="info" effect="plain">
               +{{ row.healthTags.length - 3 }}
             </el-tag>
-          </template>
+          </div>
           <span v-else class="text-disabled">无</span>
         </template>
 
@@ -245,6 +245,19 @@ async function handleDisable(row: Elder) {
 <style scoped lang="scss">
 .elder-name-link {
   font-weight: 600;
+}
+
+/* 多个标签保持单行，避免单元格内换行导致行高不一致 */
+.tag-cell {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  overflow: hidden;
+
+  :deep(.el-tag) {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
 }
 
 .alarm-count-danger {

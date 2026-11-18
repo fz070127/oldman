@@ -30,7 +30,7 @@
         <!-- 1. 基本信息 -->
         <section class="detail-block">
           <h3 class="detail-block__title">一、基本信息</h3>
-          <el-descriptions :column="3" border>
+          <el-descriptions :column="3" border label-width="96px">
             <el-descriptions-item label="姓名">{{ detail.name }}</el-descriptions-item>
             <el-descriptions-item label="性别">
               {{ detail.gender === Gender.MALE ? '男' : '女' }}
@@ -103,6 +103,7 @@
               :key="dev.id"
               :column="3"
               border
+              label-width="96px"
               class="mb-12"
             >
               <el-descriptions-item label="设备号">

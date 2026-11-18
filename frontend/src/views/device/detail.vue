@@ -21,7 +21,7 @@
         <!-- 1. 基本信息 -->
         <section class="detail-block">
           <h3 class="detail-block__title">一、设备基本信息</h3>
-          <el-descriptions :column="3" border>
+          <el-descriptions :column="3" border label-width="96px">
             <el-descriptions-item label="设备编号">
               <span class="mono-text">{{ device.deviceNo }}</span>
             </el-descriptions-item>
@@ -212,7 +212,12 @@
 </template>
 
 <script setup lang="ts">
-import * as echarts from 'echarts'
+import * as echarts from 'echarts/core'
+import { LineChart } from 'echarts/charts'
+import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
+import { CanvasRenderer } from 'echarts/renderers'
+
+echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer])
 import dayjs from 'dayjs'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ArrowLeft, Edit } from '@element-plus/icons-vue'
