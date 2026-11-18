@@ -1,0 +1,42 @@
+/**
+ * 全局 SCSS 变量（通过 vite additionalData 注入到每个组件）
+ * 注意：此文件只能放变量 / mixin，不能输出任何 CSS，否则会在每个组件重复
+ */
+
+// 品牌与状态色
+$color-primary: #1677ff;
+$color-success: #52c41a;
+$color-warning: #faad14;
+$color-danger: #ff4d4f;
+$color-info: #909399;
+
+// 背景
+$bg-page: #f5f7fa;
+$bg-white: #ffffff;
+
+// 文字
+$text-primary: #1f2329;
+$text-regular: #646a73;
+$text-disabled: #bbbfc4;
+
+// 边框
+$border-color: #e5e6eb;
+$border-color-light: #f0f1f5;
+
+// 布局尺寸
+$sidebar-width: 210px;
+$sidebar-collapsed-width: 64px;
+$navbar-height: 56px;
+$tabs-height: 40px;
+
+// 侧边栏配色
+$sidebar-bg: #001529;
+$sidebar-text: rgba(255, 255, 255, 0.75);
+$sidebar-active-bg: $color-primary;
+
+// 圆角 / 阴影
+$radius-base: 6px;
+$radius-large: 8px;
+$shadow-card: 0 1px 4px rgba(0, 21, 41, 0.06);
+
+$transition-base: all 0.25s ease;

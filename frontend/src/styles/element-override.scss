@@ -1,0 +1,33 @@
+/**
+ * Element Plus 主题覆盖：通过 CSS 变量把主题色改为 #1677FF，
+ * 并按 Element Plus 规则用 mix() 生成 light-3/5/7/8/9 与 dark-2 梯度
+ *
+ * 选择器用 html:root（特异性高于 Element 自带的 :root），
+ * 保证按需加载的 Element 样式即便后注入也不会把主题色覆盖回去
+ */
+@use './variables.scss' as *;
+
+$el-theme-colors: (
+  'primary': $color-primary,
+  'success': $color-success,
+  'warning': $color-warning,
+  'danger': $color-danger,
+  'error': $color-danger,
+);
+
+html:root {
+  @each $type, $color in $el-theme-colors {
+    --el-color-#{$type}: #{$color};
+    @each $level in (3, 5, 7, 8, 9) {
+      --el-color-#{$type}-light-#{$level}: #{mix(#ffffff, $color, $level * 10%)};
+    }
+    --el-color-#{$type}-dark-2: #{mix(#000000, $color, 20%)};
+  }
+
+  --el-bg-color-page: #{$bg-page};
+  --el-text-color-primary: #{$text-primary};
+  --el-text-color-regular: #{$text-regular};
+  --el-text-color-placeholder: #{$text-disabled};
+  --el-text-color-disabled: #{$text-disabled};
+  --el-border-radius-base: #{$radius-base};
+}
