@@ -10,7 +10,8 @@ docs/
 research/
 
 # 算法产物（可重新生成的中间文件）
-algo/data/processed/
+algo/data/processed/*
+!algo/data/processed/evaluation_results.json
 algo/data/raw/
 
 # ---------- Python ----------
