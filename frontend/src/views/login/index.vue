@@ -44,7 +44,7 @@
             登 录
           </el-button>
         </el-form>
-        <p v-if="useMock" class="login__tip">Mock 账号：admin / 123456</p>
+        <p v-if="useMock" class="login__tip">Mock 账号：admin / guardian01 / family01（密码 123456）</p>
       </div>
     </section>
   </div>
