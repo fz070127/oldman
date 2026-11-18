@@ -1,0 +1,2504 @@
+{
+  "summary": {
+    "train": {
+      "sequences": 42,
+      "frames": 6739,
+      "fall": 18,
+      "adl": 24,
+      "any_fall": 16,
+      "p0_fall": 0,
+      "false_adl": 0,
+      "p0_adl": 0,
+      "remaining_min": 7,
+      "remaining_max": 61,
+      "full_windows": 0,
+      "observed_static_3s": 0,
+      "extension_upgrades": 12,
+      "main_hits": 14,
+      "any_rate": 0.8888888888888888,
+      "p0_rate": 0.0
+    },
+    "val": {
+      "sequences": 14,
+      "frames": 2595,
+      "fall": 6,
+      "adl": 8,
+      "any_fall": 6,
+      "p0_fall": 0,
+      "false_adl": 2,
+      "p0_adl": 0,
+      "remaining_min": 15,
+      "remaining_max": 46,
+      "full_windows": 0,
+      "observed_static_3s": 0,
+      "extension_upgrades": 2,
+      "main_hits": 3,
+      "no_bbox_hits": 4,
+      "any_rate": 1.0,
+      "p0_rate": 0.0,
+      "no_bbox_rate": 0.6666666666666666,
+      "net_gain_pp": 33.333333333333336
+    },
+    "test": {
+      "sequences": 14,
+      "frames": 2602,
+      "fall": 6,
+      "adl": 8,
+      "any_fall": 2,
+      "p0_fall": 0,
+      "false_adl": 2,
+      "p0_adl": 0,
+      "remaining_min": 42,
+      "remaining_max": 49,
+      "full_windows": 0,
+      "observed_static_3s": 0,
+      "extension_upgrades": 0,
+      "main_hits": 2,
+      "no_bbox_hits": 2,
+      "any_rate": 0.3333333333333333,
+      "p0_rate": 0.0,
+      "no_bbox_rate": 0.3333333333333333,
+      "net_gain_pp": 0.0
+    },
+    "all": {
+      "sequences": 70,
+      "frames": 11936,
+      "fall": 30,
+      "adl": 40,
+      "any_fall": 24,
+      "p0_fall": 0,
+      "false_adl": 4,
+      "p0_adl": 0,
+      "remaining_min": 7,
+      "remaining_max": 61,
+      "full_windows": 0,
+      "observed_static_3s": 0,
+      "extension_upgrades": 14,
+      "main_hits": 19,
+      "any_rate": 0.8,
+      "p0_rate": 0.0
+    }
+  },
+  "sequences": [
+    {
+      "seq_id": "fall-20",
+      "detections": [
+        {
+          "frame": 50,
+          "ts_sec": 1.667,
+          "level": "P1",
+          "confidence": 0.7947,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.49527792215859506,
+            "torso_angle": 29.620951312384904,
+            "aspect_ratio": 1.2441227998443816,
+            "kp_conf": 0.7973441262455547
+          }
+        }
+      ],
+      "first_detection_frame": 50,
+      "first_detection_ts_sec": 1.667,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 5.189,
+      "split": "train",
+      "frames": 110,
+      "fps": 30,
+      "gates": {
+        "box": 109,
+        "pose": 109,
+        "T1": 22,
+        "T1_angle": 22,
+        "main_all": 21,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 110,
+        "max_height_drop": 0.630166559123658
+      },
+      "remaining_frames": 60,
+      "extension": {
+        "last_track_frame": 110,
+        "observed_boxes": 50,
+        "motion": 0.1545903096130015,
+        "final_visible": true,
+        "projected_coverage": 0.8791208791208791,
+        "final_lying_shape": false,
+        "upgrade": false
+      }
+    },
+    {
+      "seq_id": "fall-15",
+      "detections": [
+        {
+          "frame": 57,
+          "ts_sec": 1.9,
+          "level": "P1",
+          "confidence": 0.5565,
+          "signals": {
+            "signal": "bbox_only",
+            "height_drop": 0.5307279911396594,
+            "torso_angle": null,
+            "aspect_ratio": 1.8234547896249764,
+            "kp_conf": 0.42733833325259823
+          }
+        }
+      ],
+      "first_detection_frame": 57,
+      "first_detection_ts_sec": 1.9,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 2.972,
+      "split": "train",
+      "frames": 71,
+      "fps": 30,
+      "gates": {
+        "box": 71,
+        "pose": 66,
+        "T1": 8,
+        "T1_angle": 3,
+        "main_all": 2,
+        "B1_no_pose": 4,
+        "B1_wide": 4,
+        "bbox_all": 4,
+        "last_box": 71,
+        "max_height_drop": 0.5884392139338386
+      },
+      "remaining_frames": 14,
+      "extension": {
+        "last_track_frame": 71,
+        "observed_boxes": 15,
+        "motion": 0.06226866239841512,
+        "final_visible": true,
+        "projected_coverage": 1.0,
+        "final_lying_shape": true,
+        "upgrade": false
+      }
+    },
+    {
+      "seq_id": "fall-11",
+      "detections": [
+        {
+          "frame": 69,
+          "ts_sec": 2.3,
+          "level": "P1",
+          "confidence": 0.8196,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.5363194783528646,
+            "torso_angle": 19.259512197554834,
+            "aspect_ratio": 1.2787471082113087,
+            "kp_conf": 0.7532768479603178
+          }
+        }
+      ],
+      "first_detection_frame": 69,
+      "first_detection_ts_sec": 2.3,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 6.312,
+      "split": "train",
+      "frames": 130,
+      "fps": 30,
+      "gates": {
+        "box": 130,
+        "pose": 130,
+        "T1": 31,
+        "T1_angle": 28,
+        "main_all": 26,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 130,
+        "max_height_drop": 0.6504124266160181
+      },
+      "remaining_frames": 61,
+      "extension": {
+        "last_track_frame": 130,
+        "observed_boxes": 62,
+        "motion": 0.12961253425603686,
+        "final_visible": true,
+        "projected_coverage": 1.0,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-27",
+      "detections": [
+        {
+          "frame": 78,
+          "ts_sec": 2.6,
+          "level": "P1",
+          "confidence": 0.4177,
+          "signals": {
+            "signal": "bbox_only",
+            "height_drop": 0.5783790529279751,
+            "torso_angle": null,
+            "aspect_ratio": 1.9795819757301267,
+            "kp_conf": 0.15660210885107517
+          }
+        }
+      ],
+      "first_detection_frame": 78,
+      "first_detection_ts_sec": 2.6,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 3.463,
+      "split": "train",
+      "frames": 92,
+      "fps": 30,
+      "gates": {
+        "box": 77,
+        "pose": 74,
+        "T1": 2,
+        "T1_angle": 0,
+        "main_all": 0,
+        "B1_no_pose": 1,
+        "B1_wide": 1,
+        "bbox_all": 1,
+        "last_box": 78,
+        "max_height_drop": 0.5783790529279751
+      },
+      "remaining_frames": 14,
+      "extension": {
+        "last_track_frame": 78,
+        "observed_boxes": 1,
+        "motion": 0.0,
+        "final_visible": false,
+        "projected_coverage": 0.01098901098901099,
+        "final_lying_shape": true,
+        "upgrade": false
+      }
+    },
+    {
+      "seq_id": "fall-23",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 2.812,
+      "split": "train",
+      "frames": 75,
+      "fps": 30,
+      "gates": {
+        "box": 68,
+        "pose": 61,
+        "T1": 0,
+        "T1_angle": 0,
+        "main_all": 0,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 75,
+        "max_height_drop": 0.49938209420131385
+      },
+      "remaining_frames": null,
+      "extension": null
+    },
+    {
+      "seq_id": "fall-07",
+      "detections": [
+        {
+          "frame": 111,
+          "ts_sec": 3.7,
+          "level": "P1",
+          "confidence": 0.8297,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.475431201992575,
+            "torso_angle": 4.312289345450399,
+            "aspect_ratio": 1.2729774250046215,
+            "kp_conf": 0.7614092875052901
+          }
+        }
+      ],
+      "first_detection_frame": 111,
+      "first_detection_ts_sec": 3.7,
+      "label": "fall",
+      "fall_onset": 92,
+      "onset_uncertainty_frames": null,
+      "delay_frames": 19,
+      "delay_sec": 0.6333333333333333,
+      "runtime_ms": 6.901,
+      "split": "train",
+      "frames": 156,
+      "fps": 30,
+      "gates": {
+        "box": 156,
+        "pose": 151,
+        "T1": 9,
+        "T1_angle": 8,
+        "main_all": 8,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 156,
+        "max_height_drop": 0.555658329626652
+      },
+      "remaining_frames": 45,
+      "extension": {
+        "last_track_frame": 156,
+        "observed_boxes": 46,
+        "motion": 0.3276271428263923,
+        "final_visible": true,
+        "projected_coverage": 1.0,
+        "final_lying_shape": true,
+        "upgrade": false
+      }
+    },
+    {
+      "seq_id": "fall-06",
+      "detections": [
+        {
+          "frame": 41,
+          "ts_sec": 1.367,
+          "level": "P1",
+          "confidence": 0.867,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.4917018210124816,
+            "torso_angle": 29.22156973036985,
+            "aspect_ratio": 1.4828253074937485,
+            "kp_conf": 0.8197357448584893
+          }
+        }
+      ],
+      "first_detection_frame": 41,
+      "first_detection_ts_sec": 1.367,
+      "label": "fall",
+      "fall_onset": 25,
+      "onset_uncertainty_frames": null,
+      "delay_frames": 16,
+      "delay_sec": 0.5333333333333333,
+      "runtime_ms": 3.645,
+      "split": "train",
+      "frames": 100,
+      "fps": 30,
+      "gates": {
+        "box": 100,
+        "pose": 100,
+        "T1": 23,
+        "T1_angle": 23,
+        "main_all": 23,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 100,
+        "max_height_drop": 0.6477885307295275
+      },
+      "remaining_frames": 59,
+      "extension": {
+        "last_track_frame": 100,
+        "observed_boxes": 60,
+        "motion": 0.22207950567857493,
+        "final_visible": true,
+        "projected_coverage": 1.0,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-13",
+      "detections": [
+        {
+          "frame": 72,
+          "ts_sec": 2.4,
+          "level": "P1",
+          "confidence": 0.5212,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.5635798477492239,
+            "torso_angle": 26.604302515760857,
+            "aspect_ratio": 1.9720651835409775,
+            "kp_conf": 0.7369382556746987
+          }
+        }
+      ],
+      "first_detection_frame": 72,
+      "first_detection_ts_sec": 2.4,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 4.032,
+      "split": "train",
+      "frames": 85,
+      "fps": 30,
+      "gates": {
+        "box": 81,
+        "pose": 79,
+        "T1": 12,
+        "T1_angle": 9,
+        "main_all": 9,
+        "B1_no_pose": 2,
+        "B1_wide": 2,
+        "bbox_all": 2,
+        "last_box": 85,
+        "max_height_drop": 0.6255660443279778
+      },
+      "remaining_frames": 13,
+      "extension": {
+        "last_track_frame": 85,
+        "observed_boxes": 13,
+        "motion": 0.13751377307136947,
+        "final_visible": true,
+        "projected_coverage": 0.989010989010989,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-12",
+      "detections": [
+        {
+          "frame": 57,
+          "ts_sec": 1.9,
+          "level": "P1",
+          "confidence": 0.8687,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.4636198661812854,
+            "torso_angle": 22.905062326911317,
+            "aspect_ratio": 1.7847026862421835,
+            "kp_conf": 0.9018612346228432
+          }
+        }
+      ],
+      "first_detection_frame": 57,
+      "first_detection_ts_sec": 1.9,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 3.986,
+      "split": "train",
+      "frames": 110,
+      "fps": 30,
+      "gates": {
+        "box": 110,
+        "pose": 110,
+        "T1": 8,
+        "T1_angle": 8,
+        "main_all": 8,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 110,
+        "max_height_drop": 0.6125607858576417
+      },
+      "remaining_frames": 53,
+      "extension": {
+        "last_track_frame": 110,
+        "observed_boxes": 54,
+        "motion": 0.15952424535210405,
+        "final_visible": true,
+        "projected_coverage": 1.0,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-16",
+      "detections": [
+        {
+          "frame": 43,
+          "ts_sec": 1.433,
+          "level": "P1",
+          "confidence": 0.8778,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.5180450566555772,
+            "torso_angle": 9.563642978862239,
+            "aspect_ratio": 1.8780395665664162,
+            "kp_conf": 0.8601184811662225
+          }
+        }
+      ],
+      "first_detection_frame": 43,
+      "first_detection_ts_sec": 1.433,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 2.899,
+      "split": "train",
+      "frames": 55,
+      "fps": 30,
+      "gates": {
+        "box": 55,
+        "pose": 55,
+        "T1": 13,
+        "T1_angle": 13,
+        "main_all": 13,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 55,
+        "max_height_drop": 0.6273342419574518
+      },
+      "remaining_frames": 12,
+      "extension": {
+        "last_track_frame": 55,
+        "observed_boxes": 13,
+        "motion": 0.10206199638932056,
+        "final_visible": true,
+        "projected_coverage": 1.0,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-10",
+      "detections": [
+        {
+          "frame": 69,
+          "ts_sec": 2.3,
+          "level": "P1",
+          "confidence": 0.5792,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.45945173306574705,
+            "torso_angle": 16.848906359701505,
+            "aspect_ratio": 1.8966557545742644,
+            "kp_conf": 0.36574188471936125
+          }
+        }
+      ],
+      "first_detection_frame": 69,
+      "first_detection_ts_sec": 2.3,
+      "label": "fall",
+      "fall_onset": 41,
+      "onset_uncertainty_frames": null,
+      "delay_frames": 28,
+      "delay_sec": 0.9333333333333333,
+      "runtime_ms": 6.373,
+      "split": "train",
+      "frames": 130,
+      "fps": 30,
+      "gates": {
+        "box": 126,
+        "pose": 105,
+        "T1": 3,
+        "T1_angle": 1,
+        "main_all": 1,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 130,
+        "max_height_drop": 0.4773362339900503
+      },
+      "remaining_frames": 61,
+      "extension": {
+        "last_track_frame": 130,
+        "observed_boxes": 58,
+        "motion": 0.27151442785196284,
+        "final_visible": true,
+        "projected_coverage": 0.9560439560439561,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-26",
+      "detections": [
+        {
+          "frame": 39,
+          "ts_sec": 1.3,
+          "level": "P1",
+          "confidence": 0.4141,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.5229818631444035,
+            "torso_angle": 7.034558304270243,
+            "aspect_ratio": 2.036839960343562,
+            "kp_conf": 0.5061025023460388
+          }
+        }
+      ],
+      "first_detection_frame": 39,
+      "first_detection_ts_sec": 1.3,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 2.556,
+      "split": "train",
+      "frames": 61,
+      "fps": 30,
+      "gates": {
+        "box": 59,
+        "pose": 54,
+        "T1": 22,
+        "T1_angle": 17,
+        "main_all": 17,
+        "B1_no_pose": 5,
+        "B1_wide": 5,
+        "bbox_all": 5,
+        "last_box": 61,
+        "max_height_drop": 0.7028546694410109
+      },
+      "remaining_frames": 22,
+      "extension": {
+        "last_track_frame": 61,
+        "observed_boxes": 22,
+        "motion": 0.16793416390643515,
+        "final_visible": true,
+        "projected_coverage": 0.989010989010989,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-30",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 2.393,
+      "split": "train",
+      "frames": 70,
+      "fps": 30,
+      "gates": {
+        "box": 55,
+        "pose": 52,
+        "T1": 0,
+        "T1_angle": 0,
+        "main_all": 0,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 64,
+        "max_height_drop": 0.6492777619552519
+      },
+      "remaining_frames": null,
+      "extension": null
+    },
+    {
+      "seq_id": "fall-22",
+      "detections": [
+        {
+          "frame": 32,
+          "ts_sec": 1.067,
+          "level": "P1",
+          "confidence": 0.5485,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.6350649737301528,
+            "torso_angle": 5.3403996734418575,
+            "aspect_ratio": 3.1839304228113012,
+            "kp_conf": 0.4897092291537453
+          }
+        }
+      ],
+      "first_detection_frame": 32,
+      "first_detection_ts_sec": 1.067,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 2.209,
+      "split": "train",
+      "frames": 56,
+      "fps": 30,
+      "gates": {
+        "box": 56,
+        "pose": 53,
+        "T1": 18,
+        "T1_angle": 15,
+        "main_all": 15,
+        "B1_no_pose": 3,
+        "B1_wide": 3,
+        "bbox_all": 3,
+        "last_box": 56,
+        "max_height_drop": 0.7358305561639928
+      },
+      "remaining_frames": 24,
+      "extension": {
+        "last_track_frame": 56,
+        "observed_boxes": 25,
+        "motion": 0.10017912285804682,
+        "final_visible": true,
+        "projected_coverage": 1.0,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-17",
+      "detections": [
+        {
+          "frame": 88,
+          "ts_sec": 2.933,
+          "level": "P1",
+          "confidence": 0.3352,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.6926375096738835,
+            "torso_angle": 23.102432831222355,
+            "aspect_ratio": 2.0194141861782815,
+            "kp_conf": 0.3712000658406931
+          }
+        }
+      ],
+      "first_detection_frame": 88,
+      "first_detection_ts_sec": 2.933,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 3.875,
+      "split": "train",
+      "frames": 95,
+      "fps": 30,
+      "gates": {
+        "box": 85,
+        "pose": 81,
+        "T1": 6,
+        "T1_angle": 1,
+        "main_all": 1,
+        "B1_no_pose": 4,
+        "B1_wide": 2,
+        "bbox_all": 2,
+        "last_box": 95,
+        "max_height_drop": 0.6926375096738835
+      },
+      "remaining_frames": 7,
+      "extension": {
+        "last_track_frame": 95,
+        "observed_boxes": 5,
+        "motion": 0.10393839662126494,
+        "final_visible": true,
+        "projected_coverage": 0.967032967032967,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-28",
+      "detections": [
+        {
+          "frame": 51,
+          "ts_sec": 1.7,
+          "level": "P1",
+          "confidence": 0.3762,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.49176244051055523,
+            "torso_angle": 10.631656178104912,
+            "aspect_ratio": 1.9666419052148458,
+            "kp_conf": 0.4574791736462537
+          }
+        }
+      ],
+      "first_detection_frame": 51,
+      "first_detection_ts_sec": 1.7,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 2.447,
+      "split": "train",
+      "frames": 66,
+      "fps": 30,
+      "gates": {
+        "box": 61,
+        "pose": 58,
+        "T1": 12,
+        "T1_angle": 9,
+        "main_all": 9,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 66,
+        "max_height_drop": 0.7184767457746514
+      },
+      "remaining_frames": 15,
+      "extension": {
+        "last_track_frame": 66,
+        "observed_boxes": 12,
+        "motion": 0.19338473186386307,
+        "final_visible": true,
+        "projected_coverage": 0.9560439560439561,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-02",
+      "detections": [
+        {
+          "frame": 65,
+          "ts_sec": 2.167,
+          "level": "P1",
+          "confidence": 0.8274,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.4510604661801122,
+            "torso_angle": 18.54319104304429,
+            "aspect_ratio": 1.5718689091444238,
+            "kp_conf": 0.7562163283719736
+          }
+        }
+      ],
+      "first_detection_frame": 65,
+      "first_detection_ts_sec": 2.167,
+      "label": "fall",
+      "fall_onset": 40,
+      "onset_uncertainty_frames": 8,
+      "delay_frames": 25,
+      "delay_sec": 0.8333333333333334,
+      "runtime_ms": 3.763,
+      "split": "train",
+      "frames": 110,
+      "fps": 30,
+      "gates": {
+        "box": 108,
+        "pose": 93,
+        "T1": 18,
+        "T1_angle": 14,
+        "main_all": 14,
+        "B1_no_pose": 2,
+        "B1_wide": 2,
+        "bbox_all": 2,
+        "last_box": 110,
+        "max_height_drop": 0.5798674622535892
+      },
+      "remaining_frames": 45,
+      "extension": {
+        "last_track_frame": 110,
+        "observed_boxes": 44,
+        "motion": 0.29505569516274294,
+        "final_visible": true,
+        "projected_coverage": 0.978021978021978,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "fall-14",
+      "detections": [
+        {
+          "frame": 39,
+          "ts_sec": 1.3,
+          "level": "P1",
+          "confidence": 0.8749,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.4634780731216844,
+            "torso_angle": 7.834493343971801,
+            "aspect_ratio": 1.6913018362508176,
+            "kp_conf": 0.8459671919836718
+          }
+        }
+      ],
+      "first_detection_frame": 39,
+      "first_detection_ts_sec": 1.3,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 2.467,
+      "split": "train",
+      "frames": 61,
+      "fps": 30,
+      "gates": {
+        "box": 61,
+        "pose": 61,
+        "T1": 23,
+        "T1_angle": 23,
+        "main_all": 23,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 61,
+        "max_height_drop": 0.6434746092832693
+      },
+      "remaining_frames": 22,
+      "extension": {
+        "last_track_frame": 61,
+        "observed_boxes": 23,
+        "motion": 0.17699634373925788,
+        "final_visible": true,
+        "projected_coverage": 1.0,
+        "final_lying_shape": true,
+        "upgrade": true
+      }
+    },
+    {
+      "seq_id": "adl-16",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 7.807,
+      "split": "train",
+      "frames": 240,
+      "fps": 30,
+      "action": "bend",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-32",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 7.052,
+      "split": "train",
+      "frames": 200,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-07",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 7.199,
+      "split": "train",
+      "frames": 180,
+      "fps": 30,
+      "action": "sit",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-27",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 5.046,
+      "split": "train",
+      "frames": 100,
+      "fps": 30,
+      "action": "sit",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-08",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 7.368,
+      "split": "train",
+      "frames": 180,
+      "fps": 30,
+      "action": "sit",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-23",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 6.503,
+      "split": "train",
+      "frames": 220,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-40",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 10.229,
+      "split": "train",
+      "frames": 330,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-19",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 9.439,
+      "split": "train",
+      "frames": 250,
+      "fps": 30,
+      "action": "sit",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-17",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 9.212,
+      "split": "train",
+      "frames": 230,
+      "fps": 30,
+      "action": "bend",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-06",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 9.487,
+      "split": "train",
+      "frames": 230,
+      "fps": 30,
+      "action": "bend",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-33",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 6.451,
+      "split": "train",
+      "frames": 200,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-29",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 5.937,
+      "split": "train",
+      "frames": 125,
+      "fps": 30,
+      "action": "sit",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-05",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 7.999,
+      "split": "train",
+      "frames": 180,
+      "fps": 30,
+      "action": "bend",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-21",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 9.818,
+      "split": "train",
+      "frames": 280,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-35",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 9.352,
+      "split": "train",
+      "frames": 280,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-26",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 4.01,
+      "split": "train",
+      "frames": 95,
+      "fps": 30,
+      "action": "squat",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-30",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 10.718,
+      "split": "train",
+      "frames": 400,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-34",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 8.88,
+      "split": "train",
+      "frames": 191,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-15",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 10.395,
+      "split": "train",
+      "frames": 275,
+      "fps": 30,
+      "action": "bend",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-02",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 5.967,
+      "split": "train",
+      "frames": 180,
+      "fps": 30,
+      "action": "squat",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-09",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 5.774,
+      "split": "train",
+      "frames": 150,
+      "fps": 30,
+      "action": "sit",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-20",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 7.245,
+      "split": "train",
+      "frames": 270,
+      "fps": 30,
+      "action": "sit",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-24",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 3.751,
+      "split": "train",
+      "frames": 70,
+      "fps": 30,
+      "action": "squat",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-12",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 9.477,
+      "split": "train",
+      "frames": 250,
+      "fps": 30,
+      "action": "squat",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "fall-19",
+      "detections": [
+        {
+          "frame": 59,
+          "ts_sec": 1.967,
+          "level": "P1",
+          "confidence": 0.4804,
+          "signals": {
+            "signal": "bbox_only",
+            "height_drop": 0.6374963969075788,
+            "torso_angle": null,
+            "aspect_ratio": 1.6608548534596266,
+            "kp_conf": 0.28150822627632055
+          }
+        }
+      ],
+      "first_detection_frame": 59,
+      "first_detection_ts_sec": 1.967,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 4.367,
+      "split": "val",
+      "frames": 100,
+      "fps": 30,
+      "gates": {
+        "box": 73,
+        "pose": 51,
+        "T1": 9,
+        "T1_angle": 1,
+        "main_all": 0,
+        "B1_no_pose": 6,
+        "B1_wide": 6,
+        "bbox_all": 6,
+        "last_box": 99,
+        "max_height_drop": 0.6547264685200862
+      },
+      "remaining_frames": 41,
+      "extension": {
+        "last_track_frame": 99,
+        "observed_boxes": 22,
+        "motion": 0.15176304370156357,
+        "final_visible": false,
+        "projected_coverage": 0.24175824175824176,
+        "final_lying_shape": true,
+        "upgrade": false
+      },
+      "no_bbox_first_frame": null,
+      "ablation_method": "isolated_bbox_disabled"
+    },
+    {
+      "seq_id": "fall-03",
+      "detections": [
+        {
+          "frame": 187,
+          "ts_sec": 6.233,
+          "level": "P1",
+          "confidence": 0.5085,
+          "signals": {
+            "signal": "bbox_only",
+            "height_drop": 0.7029470218241637,
+            "torso_angle": null,
+            "aspect_ratio": 2.0227877600333546,
+            "kp_conf": 0.3495240384877166
+          }
+        }
+      ],
+      "first_detection_frame": 187,
+      "first_detection_ts_sec": 6.233,
+      "label": "fall",
+      "fall_onset": 152,
+      "onset_uncertainty_frames": 8,
+      "delay_frames": 35,
+      "delay_sec": 1.1666666666666667,
+      "runtime_ms": 10.271,
+      "split": "val",
+      "frames": 215,
+      "fps": 30,
+      "gates": {
+        "box": 215,
+        "pose": 204,
+        "T1": 25,
+        "T1_angle": 2,
+        "main_all": 2,
+        "B1_no_pose": 2,
+        "B1_wide": 2,
+        "bbox_all": 2,
+        "last_box": 215,
+        "max_height_drop": 0.7035844817758106
+      },
+      "remaining_frames": 28,
+      "extension": {
+        "last_track_frame": 215,
+        "observed_boxes": 29,
+        "motion": 0.06636480733075115,
+        "final_visible": true,
+        "projected_coverage": 1.0,
+        "final_lying_shape": false,
+        "upgrade": false
+      },
+      "no_bbox_first_frame": 190,
+      "ablation_method": "isolated_bbox_disabled"
+    },
+    {
+      "seq_id": "fall-18",
+      "detections": [
+        {
+          "frame": 42,
+          "ts_sec": 1.4,
+          "level": "P1",
+          "confidence": 0.6064,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.5869772318257341,
+            "torso_angle": 2.556122901045937,
+            "aspect_ratio": 2.7888302217887317,
+            "kp_conf": 0.5840557165005628
+          }
+        }
+      ],
+      "first_detection_frame": 42,
+      "first_detection_ts_sec": 1.4,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 2.894,
+      "split": "val",
+      "frames": 65,
+      "fps": 30,
+      "gates": {
+        "box": 51,
+        "pose": 45,
+        "T1": 10,
+        "T1_angle": 4,
+        "main_all": 4,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 59,
+        "max_height_drop": 0.746139034030687
+      },
+      "remaining_frames": 23,
+      "extension": {
+        "last_track_frame": 59,
+        "observed_boxes": 10,
+        "motion": 0.12312801807737747,
+        "final_visible": false,
+        "projected_coverage": 0.10989010989010989,
+        "final_lying_shape": true,
+        "upgrade": false
+      },
+      "no_bbox_first_frame": 42,
+      "ablation_method": "identical_by_absence_of_any_bbox_trigger"
+    },
+    {
+      "seq_id": "fall-29",
+      "detections": [
+        {
+          "frame": 75,
+          "ts_sec": 2.5,
+          "level": "P1",
+          "confidence": 0.5884,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.45507601758446853,
+            "torso_angle": 17.287896556004764,
+            "aspect_ratio": 1.375237367283324,
+            "kp_conf": 0.6260590500691358
+          }
+        }
+      ],
+      "first_detection_frame": 75,
+      "first_detection_ts_sec": 2.5,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 4.195,
+      "split": "val",
+      "frames": 99,
+      "fps": 30,
+      "gates": {
+        "box": 89,
+        "pose": 76,
+        "T1": 17,
+        "T1_angle": 4,
+        "main_all": 4,
+        "B1_no_pose": 3,
+        "B1_wide": 3,
+        "bbox_all": 3,
+        "last_box": 99,
+        "max_height_drop": 0.574020507011775
+      },
+      "remaining_frames": 24,
+      "extension": {
+        "last_track_frame": 99,
+        "observed_boxes": 17,
+        "motion": 0.08943375314731017,
+        "final_visible": true,
+        "projected_coverage": 0.9120879120879121,
+        "final_lying_shape": true,
+        "upgrade": true
+      },
+      "no_bbox_first_frame": 75,
+      "ablation_method": "isolated_bbox_disabled"
+    },
+    {
+      "seq_id": "fall-05",
+      "detections": [
+        {
+          "frame": 105,
+          "ts_sec": 3.5,
+          "level": "P1",
+          "confidence": 0.7676,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.4888731617261906,
+            "torso_angle": 2.80624969730412,
+            "aspect_ratio": 1.290031715956208,
+            "kp_conf": 0.7044677795732722
+          }
+        }
+      ],
+      "first_detection_frame": 105,
+      "first_detection_ts_sec": 3.5,
+      "label": "fall",
+      "fall_onset": 86,
+      "onset_uncertainty_frames": null,
+      "delay_frames": 19,
+      "delay_sec": 0.6333333333333333,
+      "runtime_ms": 6.234,
+      "split": "val",
+      "frames": 151,
+      "fps": 30,
+      "gates": {
+        "box": 140,
+        "pose": 133,
+        "T1": 8,
+        "T1_angle": 7,
+        "main_all": 6,
+        "B1_no_pose": 1,
+        "B1_wide": 1,
+        "bbox_all": 1,
+        "last_box": 151,
+        "max_height_drop": 0.568461800041149
+      },
+      "remaining_frames": 46,
+      "extension": {
+        "last_track_frame": 151,
+        "observed_boxes": 36,
+        "motion": 0.1902863850027551,
+        "final_visible": true,
+        "projected_coverage": 0.8791208791208791,
+        "final_lying_shape": true,
+        "upgrade": true
+      },
+      "no_bbox_first_frame": 105,
+      "ablation_method": "isolated_bbox_disabled"
+    },
+    {
+      "seq_id": "fall-25",
+      "detections": [
+        {
+          "frame": 70,
+          "ts_sec": 2.333,
+          "level": "P1",
+          "confidence": 0.5859,
+          "signals": {
+            "signal": "bbox_only",
+            "height_drop": 0.5210675572724363,
+            "torso_angle": null,
+            "aspect_ratio": 1.7517693719172616,
+            "kp_conf": 0.26236397279974294
+          }
+        }
+      ],
+      "first_detection_frame": 70,
+      "first_detection_ts_sec": 2.333,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 3.298,
+      "split": "val",
+      "frames": 85,
+      "fps": 30,
+      "gates": {
+        "box": 73,
+        "pose": 66,
+        "T1": 6,
+        "T1_angle": 0,
+        "main_all": 0,
+        "B1_no_pose": 4,
+        "B1_wide": 4,
+        "bbox_all": 4,
+        "last_box": 83,
+        "max_height_drop": 0.5480592634176092
+      },
+      "remaining_frames": 15,
+      "extension": {
+        "last_track_frame": 83,
+        "observed_boxes": 6,
+        "motion": 0.06474082996541605,
+        "final_visible": false,
+        "projected_coverage": 0.06593406593406594,
+        "final_lying_shape": true,
+        "upgrade": false
+      },
+      "no_bbox_first_frame": null,
+      "ablation_method": "isolated_bbox_disabled"
+    },
+    {
+      "seq_id": "adl-36",
+      "detections": [
+        {
+          "frame": 248,
+          "ts_sec": 8.267,
+          "level": "P1",
+          "confidence": 0.5691,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.5176873719629873,
+            "torso_angle": 38.390659710900174,
+            "aspect_ratio": 1.3612345924746403,
+            "kp_conf": 0.7172374655218685
+          }
+        }
+      ],
+      "first_detection_frame": 248,
+      "first_detection_ts_sec": 8.267,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 12.327,
+      "split": "val",
+      "frames": 340,
+      "fps": 30,
+      "action": "lie",
+      "review": "human_video_confirmed"
+    },
+    {
+      "seq_id": "adl-13",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 10.654,
+      "split": "val",
+      "frames": 265,
+      "fps": 30,
+      "action": "squat",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-03",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 7.727,
+      "split": "val",
+      "frames": 180,
+      "fps": 30,
+      "action": "squat",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-04",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 7.585,
+      "split": "val",
+      "frames": 150,
+      "fps": 30,
+      "action": "bend",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-37",
+      "detections": [
+        {
+          "frame": 267,
+          "ts_sec": 8.9,
+          "level": "P1",
+          "confidence": 0.5951,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.5070684895409454,
+            "torso_angle": 2.2057628166203322,
+            "aspect_ratio": 1.281409571052184,
+            "kp_conf": 0.8036643494577969
+          }
+        }
+      ],
+      "first_detection_frame": 267,
+      "first_detection_ts_sec": 8.9,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 13.031,
+      "split": "val",
+      "frames": 350,
+      "fps": 30,
+      "action": "lie",
+      "review": "human_video_confirmed"
+    },
+    {
+      "seq_id": "adl-25",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 4.617,
+      "split": "val",
+      "frames": 110,
+      "fps": 30,
+      "action": "sit",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-31",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 10.882,
+      "split": "val",
+      "frames": 250,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-14",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 12.267,
+      "split": "val",
+      "frames": 235,
+      "fps": 30,
+      "action": "squat",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "fall-08",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "fall",
+      "fall_onset": 31,
+      "onset_uncertainty_frames": 8,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 6.96,
+      "split": "test",
+      "frames": 91,
+      "fps": 30,
+      "gates": {
+        "box": 91,
+        "pose": 91,
+        "T1": 0,
+        "T1_angle": 0,
+        "main_all": 0,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 91,
+        "max_height_drop": 0.38574352090732056,
+        "max_speed_at_qualifying_drop": null
+      },
+      "remaining_frames": null,
+      "extension": null,
+      "no_bbox_first_frame": null,
+      "ablation_method": "identical_by_absence_of_any_bbox_trigger",
+      "failure_reason": "坐姿起跌，手先撑地；坐姿到卧地的相对框高变化不足。"
+    },
+    {
+      "seq_id": "fall-09",
+      "detections": [
+        {
+          "frame": 143,
+          "ts_sec": 4.767,
+          "level": "P1",
+          "confidence": 0.827,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.5355927879884083,
+            "torso_angle": 16.792264833137455,
+            "aspect_ratio": 1.2362643361180956,
+            "kp_conf": 0.7283625532599056
+          }
+        }
+      ],
+      "first_detection_frame": 143,
+      "first_detection_ts_sec": 4.767,
+      "label": "fall",
+      "fall_onset": 127,
+      "onset_uncertainty_frames": null,
+      "delay_frames": 16,
+      "delay_sec": 0.5333333333333333,
+      "runtime_ms": 9.958,
+      "split": "test",
+      "frames": 185,
+      "fps": 30,
+      "gates": {
+        "box": 179,
+        "pose": 170,
+        "T1": 20,
+        "T1_angle": 12,
+        "main_all": 10,
+        "B1_no_pose": 7,
+        "B1_wide": 7,
+        "bbox_all": 7,
+        "last_box": 185,
+        "max_height_drop": 0.6415264896344735
+      },
+      "remaining_frames": 42,
+      "extension": {
+        "last_track_frame": 185,
+        "observed_boxes": 36,
+        "motion": 0.5278350245372789,
+        "final_visible": true,
+        "projected_coverage": 0.9230769230769231,
+        "final_lying_shape": true,
+        "upgrade": false
+      },
+      "no_bbox_first_frame": 143,
+      "ablation_method": "isolated_bbox_disabled"
+    },
+    {
+      "seq_id": "fall-24",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 4.851,
+      "split": "test",
+      "frames": 60,
+      "fps": 30,
+      "gates": {
+        "box": 54,
+        "pose": 53,
+        "T1": 0,
+        "T1_angle": 0,
+        "main_all": 0,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 60,
+        "max_height_drop": 0.7213323826624665,
+        "max_speed_at_qualifying_drop": 0.7839698791503906
+      },
+      "remaining_frames": null,
+      "extension": null,
+      "no_bbox_first_frame": null,
+      "ablation_method": "identical_by_absence_of_any_bbox_trigger",
+      "failure_reason": "椅边前倾、手膝撑地，身体在下缘被裁切；有足够降幅时框高下降速率偏低。"
+    },
+    {
+      "seq_id": "fall-01",
+      "detections": [
+        {
+          "frame": 111,
+          "ts_sec": 3.7,
+          "level": "P1",
+          "confidence": 0.7558,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.4560197472525816,
+            "torso_angle": 23.810281965671123,
+            "aspect_ratio": 1.4532643915307473,
+            "kp_conf": 0.6692464158815496
+          }
+        }
+      ],
+      "first_detection_frame": 111,
+      "first_detection_ts_sec": 3.7,
+      "label": "fall",
+      "fall_onset": 90,
+      "onset_uncertainty_frames": null,
+      "delay_frames": 21,
+      "delay_sec": 0.7,
+      "runtime_ms": 10.119,
+      "split": "test",
+      "frames": 160,
+      "fps": 30,
+      "gates": {
+        "box": 137,
+        "pose": 128,
+        "T1": 18,
+        "T1_angle": 5,
+        "main_all": 5,
+        "B1_no_pose": 4,
+        "B1_wide": 4,
+        "bbox_all": 4,
+        "last_box": 158,
+        "max_height_drop": 0.6106133419543924
+      },
+      "remaining_frames": 49,
+      "extension": {
+        "last_track_frame": 158,
+        "observed_boxes": 27,
+        "motion": 0.334185404606033,
+        "final_visible": false,
+        "projected_coverage": 0.2967032967032967,
+        "final_lying_shape": true,
+        "upgrade": false
+      },
+      "no_bbox_first_frame": 111,
+      "ablation_method": "isolated_bbox_disabled"
+    },
+    {
+      "seq_id": "fall-04",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "fall",
+      "fall_onset": 10,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 8.0,
+      "split": "test",
+      "frames": 96,
+      "fps": 30,
+      "gates": {
+        "box": 90,
+        "pose": 61,
+        "T1": 0,
+        "T1_angle": 0,
+        "main_all": 0,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 96,
+        "max_height_drop": 0.5115464753369483,
+        "max_speed_at_qualifying_drop": 0.7910385131835938
+      },
+      "remaining_frames": null,
+      "extension": null,
+      "no_bbox_first_frame": null,
+      "ablation_method": "identical_by_absence_of_any_bbox_trigger",
+      "failure_reason": "由椅旁的低姿态前扑，向画面下缘滚出；框高降幅与下降速率未同时过线。"
+    },
+    {
+      "seq_id": "fall-21",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "fall",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 4.059,
+      "split": "test",
+      "frames": 55,
+      "fps": 30,
+      "gates": {
+        "box": 41,
+        "pose": 41,
+        "T1": 0,
+        "T1_angle": 0,
+        "main_all": 0,
+        "B1_no_pose": 0,
+        "B1_wide": 0,
+        "bbox_all": 0,
+        "last_box": 43,
+        "max_height_drop": 0.36393377796214876,
+        "max_speed_at_qualifying_drop": null
+      },
+      "remaining_frames": null,
+      "extension": null,
+      "no_bbox_first_frame": null,
+      "ablation_method": "identical_by_absence_of_any_bbox_trigger",
+      "failure_reason": "正对镜头前扑并越出画面下缘，最后阶段整个人体框丢失。"
+    },
+    {
+      "seq_id": "adl-10",
+      "detections": [
+        {
+          "frame": 231,
+          "ts_sec": 7.7,
+          "level": "P1",
+          "confidence": 0.7411,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.48671679735235,
+            "torso_angle": 35.331785953638914,
+            "aspect_ratio": 1.3438139623739633,
+            "kp_conf": 0.7865833394667682
+          }
+        }
+      ],
+      "first_detection_frame": 231,
+      "first_detection_ts_sec": 7.7,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 25.571,
+      "split": "test",
+      "frames": 300,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-39",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 17.489,
+      "split": "test",
+      "frames": 270,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-22",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 12.598,
+      "split": "test",
+      "frames": 240,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-28",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 7.205,
+      "split": "test",
+      "frames": 85,
+      "fps": 30,
+      "action": "bend",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-11",
+      "detections": [
+        {
+          "frame": 223,
+          "ts_sec": 7.433,
+          "level": "P1",
+          "confidence": 0.7197,
+          "signals": {
+            "signal": "keypoints",
+            "height_drop": 0.4716778643853401,
+            "torso_angle": 32.06369452782131,
+            "aspect_ratio": 1.2027554985383575,
+            "kp_conf": 0.6749346676994773
+          }
+        }
+      ],
+      "first_detection_frame": 223,
+      "first_detection_ts_sec": 7.433,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 18.407,
+      "split": "test",
+      "frames": 300,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-01",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 14.373,
+      "split": "test",
+      "frames": 150,
+      "fps": 30,
+      "action": "squat",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-18",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 14.1,
+      "split": "test",
+      "frames": 265,
+      "fps": 30,
+      "action": "sit",
+      "review": "visual_frame_review"
+    },
+    {
+      "seq_id": "adl-38",
+      "detections": [],
+      "first_detection_frame": null,
+      "first_detection_ts_sec": null,
+      "label": "adl",
+      "fall_onset": null,
+      "onset_uncertainty_frames": null,
+      "delay_frames": null,
+      "delay_sec": null,
+      "runtime_ms": 15.692,
+      "split": "test",
+      "frames": 345,
+      "fps": 30,
+      "action": "lie",
+      "review": "visual_frame_review"
+    }
+  ],
+  "actions": {
+    "train": {
+      "squat": {
+        "n": 4,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "bend": {
+        "n": 5,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "sit": {
+        "n": 7,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "lie": {
+        "n": 8,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "walk": {
+        "n": 0,
+        "fp": 0,
+        "rate": null
+      }
+    },
+    "val": {
+      "squat": {
+        "n": 3,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "bend": {
+        "n": 1,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "sit": {
+        "n": 1,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "lie": {
+        "n": 3,
+        "fp": 2,
+        "rate": 0.6666666666666666
+      },
+      "walk": {
+        "n": 0,
+        "fp": 0,
+        "rate": null
+      }
+    },
+    "test": {
+      "squat": {
+        "n": 1,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "bend": {
+        "n": 1,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "sit": {
+        "n": 1,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "lie": {
+        "n": 5,
+        "fp": 2,
+        "rate": 0.4
+      },
+      "walk": {
+        "n": 0,
+        "fp": 0,
+        "rate": null
+      }
+    },
+    "all": {
+      "squat": {
+        "n": 8,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "bend": {
+        "n": 7,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "sit": {
+        "n": 9,
+        "fp": 0,
+        "rate": 0.0
+      },
+      "lie": {
+        "n": 16,
+        "fp": 4,
+        "rate": 0.25
+      },
+      "walk": {
+        "n": 0,
+        "fp": 0,
+        "rate": null
+      }
+    }
+  },
+  "latency": {
+    "keypoints": {
+      "n": 7,
+      "frames": [
+        16,
+        16,
+        19,
+        19,
+        21,
+        25,
+        28
+      ],
+      "mean": 20.571428571428573,
+      "median": 19,
+      "mean_sec": 0.6857142857142857
+    },
+    "bbox_only": {
+      "n": 1,
+      "frames": [
+        35
+      ],
+      "mean": 35,
+      "median": 35,
+      "mean_sec": 1.1666666666666667
+    }
+  },
+  "frozen_metrics": {
+    "val": {
+      "fall_sequences": 6,
+      "fall_hits": 6,
+      "fall_detection_rate": 1.0,
+      "adl_sequences": 8,
+      "adl_false_alarm_sequences": 2,
+      "adl_p0_sequences": 0,
+      "adl_p0_events": 0,
+      "path_hits": {
+        "keypoints": {
+          "fall": 3,
+          "adl": 2
+        },
+        "bbox_only": {
+          "fall": 3,
+          "adl": 0
+        }
+      },
+      "delay_sample_count": 2,
+      "delay_frames": {
+        "min": 19,
+        "median": 27.0,
+        "mean": 27,
+        "max": 35
+      },
+      "mean_delay_sec": 0.9,
+      "max_sequence_runtime_ms": 13.031
+    },
+    "test": {
+      "fall_sequences": 6,
+      "fall_hits": 2,
+      "fall_detection_rate": 0.3333333333333333,
+      "adl_sequences": 8,
+      "adl_false_alarm_sequences": 2,
+      "adl_p0_sequences": 0,
+      "adl_p0_events": 0,
+      "path_hits": {
+        "keypoints": {
+          "fall": 2,
+          "adl": 2
+        },
+        "bbox_only": {
+          "fall": 0,
+          "adl": 0
+        }
+      },
+      "delay_sample_count": 2,
+      "delay_frames": {
+        "min": 16,
+        "median": 18.5,
+        "mean": 18.5,
+        "max": 21
+      },
+      "mean_delay_sec": 0.6166666666666667,
+      "max_sequence_runtime_ms": 25.571
+    }
+  },
+  "baseline_test_runs": 1,
+  "test_file_modified": "2026-11-18T14:53:44.483121+08:00",
+  "test_sequence_runtime_sum_ms": 169.382,
+  "source_sha256": {
+    "a3-validation.json": "a513d948569cad338e248480dcebca1309ca8f4d1b2d072793d6ff232e8ecd76",
+    "a3-test-final.json": "107520f4e16e8eabdaf7ac46f5d857b36e1e9aa24ca974e8d6068870c4bcbefd",
+    "detector.yaml": "880314b8de430a7905c12f4e1ea44672ef3fb3935e9b1f50d0532031db86163d"
+  },
+  "config": {
+    "frame_width": 640,
+    "frame_height": 480,
+    "drop_window_sec": 1.0,
+    "motion_window_sec": 3.0,
+    "point_conf_min": 0.3,
+    "kp_conf_min": 0.3,
+    "height_drop_min": 0.45,
+    "v_drop_min": 0.85,
+    "torso_angle_max": 40.0,
+    "aspect_ratio_min": 1.2,
+    "motion_max": 0.3,
+    "motion_coverage_min": 0.8,
+    "bbox_height_drop_min": 0.5,
+    "bbox_v_drop_factor": 1.2,
+    "bbox_aspect_ratio_min": 1.4,
+    "bbox_floor_margin": 0.15,
+    "recovery_angle_min": 60.0,
+    "recovery_aspect_max": 0.9,
+    "recovery_height_fraction": 0.75,
+    "track_gap_sec": 0.5,
+    "track_max_cost": 0.85,
+    "track_reacquire_iou_min": 0.05,
+    "furniture_rois": []
+  },
+  "extraction": {
+    "sequences": 70,
+    "frames": 11936,
+    "workers": 2,
+    "wall_sec": 533.2510422000014,
+    "ms_per_frame": 44.67585809316366
+  },
+  "extension_assumption": "Repeat the final observed frame for 90 frames, including missing observations. Assess existing P1 episodes only.",
+  "edge_planning": {
+    "target_fps": 15,
+    "period_ms": 66.66666666666667,
+    "rule_budget_ms": 2,
+    "acquisition_pose_budget_ms": 60
+  },
+  "review_notes": {
+    "adl-36": "用户已看片确认：坐到床沿，再侧躺到床面。",
+    "adl-37": "用户已看片确认：坐到床沿，再侧躺到床面。",
+    "adl-10": "RGB 目检：坐到软垫上，抬腿横卧。",
+    "adl-11": "RGB 目检：先坐在软垫边缘，再收腿侧躺。"
+  },
+  "approved_onset_count": 10,
+  "approved_detected_count": 8,
+  "confirmation_window_frames": 90,
+  "test_ablation_sequences": [
+    "fall-09",
+    "fall-01"
+  ]
+}

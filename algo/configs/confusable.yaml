@@ -31,5 +31,45 @@
 # 我们的 confusable_type 取值与之对齐：sit / lie / bend / squat / stumble
 
 # ── 填写区（每行 `adl-xx: 动作`，未查看的留空）──
-# adl-01: sit
-# adl-02: lie
+# A4 按主要动作归类。lie 含家具上躺卧，以及手膝支撑后在地面卧下。
+# adl-36、37 由负责人看片确认，其余为逐段 RGB 时序抽帧目检。
+adl-01: squat
+adl-02: squat
+adl-03: squat
+adl-04: bend
+adl-05: bend
+adl-06: bend
+adl-07: sit
+adl-08: sit
+adl-09: sit
+adl-10: lie
+adl-11: lie
+adl-12: squat
+adl-13: squat
+adl-14: squat
+adl-15: bend
+adl-16: bend
+adl-17: bend
+adl-18: sit
+adl-19: sit
+adl-20: sit
+adl-21: lie
+adl-22: lie
+adl-23: lie
+adl-24: squat
+adl-25: sit
+adl-26: squat
+adl-27: sit
+adl-28: bend
+adl-29: sit
+adl-30: lie
+adl-31: lie
+adl-32: lie
+adl-33: lie
+adl-34: lie
+adl-35: lie
+adl-36: lie
+adl-37: lie
+adl-38: lie
+adl-39: lie
+adl-40: lie
