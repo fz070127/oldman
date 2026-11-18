@@ -6,7 +6,6 @@ from uuid import uuid4
 
 import httpx
 import pytest
-from redis.asyncio import Redis
 from sqlalchemy import func, select, text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
@@ -180,7 +179,10 @@ async def records_app():
         ):
             app.state.db = engine
             if not redis_url:
-                app.state.redis = AsyncMock(spec=Redis)
+                # spec=Redis 会把 exists 变成同步 Mock（redis-py 用装饰器包装协程方法，
+                # inspect.iscoroutinefunction 返回 False），await 时抛 TypeError。
+                # 这里用无 spec 的 AsyncMock，再由测试显式设定各方法行为。
+                app.state.redis = AsyncMock()
                 app.state.redis.exists.return_value = 0
             yield client, headers, factory
     finally:
