@@ -27,18 +27,30 @@
 <script setup lang="ts">
 import { Expand, Fold } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
+import { useUserStore } from '@/stores/user'
+import { asyncRoutes, isDynamicRoutesLoaded } from '@/router'
 import SidebarItem from './SidebarItem.vue'
 
 const appStore = useAppStore()
+const userStore = useUserStore()
 const route = useRoute()
-const router = useRouter()
 
 const collapsed = computed(() => appStore.sidebarCollapsed)
 
-/** 菜单数据：取具名路由 Layout 的子路由（过滤 hidden），addRoute 后同样生效 */
+/**
+ * 菜单数据：取已挂载的动态业务路由。
+ *
+ * 注意：Vue Router 4 的 `getRoutes()` 返回的是扁平 matcher 列表，
+ * `router.addRoute('Layout', child)` 之后子路由并不会进入父级 matcher 的
+ * `children` 字段（该字段永远是空数组）。因此不能靠 Layout.children 取菜单，
+ * 必须从扁平列表里按「已注册的动态路由名」筛选。
+ * 同时依赖 userStore.menus，确保切换账号/动态刷新时响应式更新。
+ */
 const menuRoutes = computed(() => {
-  const layout = router.getRoutes().find((r) => r.name === 'Layout')
-  return (layout?.children ?? []).filter((r) => !r.meta?.hidden)
+  void userStore.menus.length
+  void isDynamicRoutesLoaded()
+  const menuSet = new Set(userStore.menus)
+  return asyncRoutes.filter((r) => r.meta?.menuKey && menuSet.has(r.meta.menuKey) && !r.meta?.hidden)
 })
 
 const activeMenu = computed(() => route.path)

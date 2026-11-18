@@ -30,6 +30,16 @@ export const useTabsStore = defineStore('tabs', {
           })
         })
     },
+    /** 按当前角色已注册的路由重置并同步 affix 标签（防止切换账号残留旧标签） */
+    syncWithMenus(routes: Array<{ path: string; name?: string | symbol; meta: RouteMeta }>) {
+      const validPaths = new Set(routes.map((r) => r.path))
+      this.tabs = this.tabs.filter((t) => validPaths.has(t.path))
+      this.initAffixTabs(routes)
+    },
+    /** 登出时清空全部标签（含 affix） */
+    resetTabs() {
+      this.tabs = []
+    },
     addTab(route: RouteLocationNormalized) {
       if (!route.meta.title || route.meta.hidden) return
       const exist = this.tabs.find((t) => t.path === route.path)

@@ -8,6 +8,10 @@ declare module 'vue-router' {
     title?: string
     /** 菜单图标（Element Plus 图标组件） */
     icon?: Component
+    /** 菜单权限标识（与 /auth/me 返回的 menus 对应） */
+    menuKey?: string
+    /** 路由访问细粒度权限码（可选，如 'system:read'） */
+    permission?: string
     /** 是否在侧边栏隐藏 */
     hidden?: boolean
     /** 标签页是否固定（不可关闭） */

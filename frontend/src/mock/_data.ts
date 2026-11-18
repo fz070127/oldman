@@ -714,17 +714,59 @@ syncElderAlarmStats()
 
 // ---------------- 5. 公共组装辅助函数 ----------------
 
+const ESCALATE_CYCLE_SEC = 60
+
+/**
+ * 修正 PENDING 告警随 dev server 运行产生的时间漂移：
+ * 若某条 PENDING 告警距离当前时间已满/超过 60s（或出现异常未来时间），
+ * 自动将其 createdAt / notifiedAt 及关联事件的 occurredAt 重锚定到当前近 8~50 秒内，
+ * 保证任意时刻查询，createdAt 都在近 1 分钟内且 remainingSec 严格在 10~52 正整数区间，绝不出现负数。
+ */
+export function refreshPendingAlarmTimestamps(): void {
+  const nowMs = Date.now()
+  let eventChanged = false
+  let pendingIdx = 0
+
+  for (const alarm of alarmsStore) {
+    if (alarm.status !== AlarmStatus.PENDING) continue
+    const elapsedSec = Math.floor((nowMs - new Date(alarm.createdAt).getTime()) / 1000)
+    if (elapsedSec >= ESCALATE_CYCLE_SEC - 2 || elapsedSec < 0) {
+      const freshAgeSec = 8 + ((pendingIdx * 3) % 42) // 8~49 秒前
+      const baseTime = dayjs(nowMs).subtract(freshAgeSec + 2, 'second')
+      const freshCreated = formatIsoOffset(baseTime.add(2, 'second'))
+      alarm.createdAt = freshCreated
+      alarm.notifiedAt = freshCreated
+
+      const notifyAct = alarm.actions.find((a) => a.action === AlarmActionType.NOTIFY)
+      if (notifyAct) notifyAct.createdAt = freshCreated
+
+      const ev = eventsStore.find((e) => e.id === alarm.eventId)
+      if (ev) {
+        ev.occurredAt = formatIsoOffset(baseTime)
+        eventChanged = true
+      }
+    }
+    pendingIdx += 1
+  }
+
+  if (eventChanged) {
+    eventsStore.sort((a, b) => new Date(b.occurredAt).getTime() - new Date(a.occurredAt).getTime())
+  }
+}
+
 /** 计算 PENDING 告警距下一级升级的剩余秒数，非 PENDING 返回 null */
 export function calcRemainingSec(alarm: AlarmRecord): number | null {
   if (alarm.status !== AlarmStatus.PENDING) return null
-  const elapsed = Math.floor((Date.now() - new Date(alarm.createdAt).getTime()) / 1000)
-  // 若运行时间较长导致超过 60s，仍在 600s 窗口内保持正数倒计时
-  if (elapsed < 60) return Math.max(1, 60 - elapsed)
-  return Math.max(1, 600 - elapsed)
+  refreshPendingAlarmTimestamps()
+  const elapsed = Math.max(0, Math.floor((Date.now() - new Date(alarm.createdAt).getTime()) / 1000))
+  return Math.max(1, ESCALATE_CYCLE_SEC - elapsed)
 }
 
-/** 构造对外返回的 AlarmItem（含实时计算的 remainingSec） */
+/** 构造对外返回的 AlarmItem（自动刷新漂移时间 + 实时计算 remainingSec） */
 export function toAlarmListItem(alarm: AlarmRecord): AlarmItem {
+  if (alarm.status === AlarmStatus.PENDING) {
+    refreshPendingAlarmTimestamps()
+  }
   return {
     id: alarm.id,
     level: alarm.level,
@@ -787,6 +829,9 @@ export function buildAlarmTimeline(alarm: AlarmRecord, ev: EventRecord): AlarmTi
 
 /** 构造完整告警详情（GET /alarms/{id}） */
 export function buildAlarmDetail(alarm: AlarmRecord): AlarmDetail {
+  if (alarm.status === AlarmStatus.PENDING) {
+    refreshPendingAlarmTimestamps()
+  }
   const elder = eldersStore.find((e) => e.id === alarm.elderId) || eldersStore[0]
   const ev = eventsStore.find((e) => e.id === alarm.eventId) || eventsStore[0]
   const primary = elder.emergencyContact.find((c) => c.primary) || elder.emergencyContact[0] || null

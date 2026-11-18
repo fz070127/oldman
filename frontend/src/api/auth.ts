@@ -2,7 +2,13 @@
  * 认证接口 —— 《接口契约 v1.0》3.3
  */
 import request from './request'
-import type { LoginParams, LoginResult, RefreshParams, UserInfo } from '@/types/user'
+import type {
+  LoginParams,
+  LoginResult,
+  RefreshParams,
+  UpdatePasswordParams,
+  UserInfo,
+} from '@/types/user'
 
 /** 登录 */
 export function login(data: LoginParams) {
@@ -22,4 +28,9 @@ export function logout() {
 /** 当前用户 + permissions + menus */
 export function getMe() {
   return request<UserInfo>({ url: '/auth/me', method: 'get' })
+}
+
+/** 修改密码 */
+export function updatePassword(data: UpdatePasswordParams) {
+  return request<null>({ url: '/auth/password', method: 'put', data })
 }
