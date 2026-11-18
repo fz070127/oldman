@@ -1,0 +1,29 @@
+frame_width: 640
+frame_height: 480
+drop_window_sec: 1.0
+motion_window_sec: 3.0
+
+point_conf_min: 0.30
+kp_conf_min: 0.30
+height_drop_min: 0.45
+v_drop_min: 0.85       # Screen heights per second.
+torso_angle_max: 40.0
+aspect_ratio_min: 1.2
+motion_max: 0.30      # In bounding-box diagonals.
+motion_coverage_min: 0.80
+
+bbox_height_drop_min: 0.50
+bbox_v_drop_factor: 1.20
+bbox_aspect_ratio_min: 1.40
+bbox_floor_margin: 0.15
+
+recovery_angle_min: 60.0
+recovery_aspect_max: 0.90
+recovery_height_fraction: 0.75
+track_gap_sec: 0.50
+track_max_cost: 0.85
+track_reacquire_iou_min: 0.05  # Require spatial overlap after a missed frame.
+
+# Normalized [left, top, right, bottom]. Match the lying box's bottom center.
+# action: suppress (no alert) or p1 (cap at P1). Empty for the UR Fall baseline.
+furniture_rois: []
