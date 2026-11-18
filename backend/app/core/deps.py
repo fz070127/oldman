@@ -21,11 +21,18 @@ bearer = HTTPBearer(auto_error=False)
 DbSession = Annotated[AsyncSession, Depends(get_db)]
 
 
+def get_audit_service(request: Request) -> AuditService:
+    return AuditService(get_sessionmaker(request))
+
+
+Audit = Annotated[AuditService, Depends(get_audit_service)]
+
+
 def get_auth_service(request: Request) -> AuthService:
     return AuthService(
         TokenIssuer(request.app.state.settings),
         AuthRedis(request.app.state.redis),
-        AuditService(get_sessionmaker(request)),
+        get_audit_service(request),
     )
 
 
@@ -75,3 +82,6 @@ def get_user_scope(user: CurrentUser) -> ColumnElement[bool] | None:
         elder_ids = select(FamilyBinding.elder_id).where(FamilyBinding.user_id == user.id)
         return Elder.id.in_(elder_ids)
     return false()
+
+
+UserScope = Annotated[ColumnElement[bool] | None, Depends(get_user_scope)]
