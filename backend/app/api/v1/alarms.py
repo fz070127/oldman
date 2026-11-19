@@ -10,6 +10,7 @@ from app.schemas.records import RecordId
 from app.services import alarm_service
 from app.services.escalation_rules import EscalationRules
 from app.services.records import commit_and_audit
+from app.ws.publisher import alarm_update
 
 router = APIRouter(prefix="/alarms", tags=["告警"])
 read_alarm = Depends(require_permission("alarm:read"))
@@ -31,7 +32,7 @@ async def list_alarms(
     return R.page(items, total, query.page, query.page_size)
 
 
-@router.get("/pending-count", dependencies=[read_alarm])
+@router.get("/pending-count")
 async def pending_count(db: DbSession, scope: UserScope):
     return R.ok({"count": await alarm_service.pending_count(db, scope)})
 
@@ -54,6 +55,9 @@ async def update_alarm(db, alarm_id, scope, actor, body, audit, rules):
     row = await alarm_service.find_alarm(db, alarm_id, scope)
     data = alarm_service.alarm_fields(*row, rules=rules)
     await commit_and_audit(db, audit, actor.id, action, alarm_id, body.model_dump())
+    realtime = db.info.get("realtime")
+    if realtime is not None:
+        await realtime.alarm(row.Alarm.elder_id, alarm_update(row.Alarm, data["currentHandler"]))
     return R.ok(data)
 
 

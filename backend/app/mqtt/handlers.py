@@ -9,11 +9,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.exceptions import BizException
-from app.models import Device
+from app.models import Device, Elder
+from app.models.enums import DeviceStatus
 from app.mqtt.publisher import Command, MqttPublisher
 from app.schemas.events import IngestPayload
 from app.schemas.records import NO_NUL
 from app.services.event_service import ingest
+from app.ws.publisher import RealtimePublisher
 
 log = structlog.get_logger()
 
@@ -38,10 +40,12 @@ class MqttHandlers:
         sessions: async_sessionmaker[AsyncSession],
         redis: Redis,
         publisher: MqttPublisher,
+        realtime: RealtimePublisher | None = None,
     ):
         self.sessions = sessions
         self.redis = redis
         self.publisher = publisher
+        self.realtime = realtime
 
     async def on_heartbeat(self, device_no: str, raw: bytes) -> None:
         try:
@@ -55,18 +59,23 @@ class MqttHandlers:
 
         received_at = datetime.now(UTC)
         async with self.sessions.begin() as db:
-            device = await db.scalar(
-                select(Device).where(Device.device_no == device_no).with_for_update()
-            )
-            if device is None:
+            row = (
+                await db.execute(
+                    select(Device, Elder.community_id)
+                    .outerjoin(Elder)
+                    .where(Device.device_no == device_no)
+                    .with_for_update(of=Device)
+                )
+            ).one_or_none()
+            if row is None:
                 log.warning("mqtt_unknown_device", device_no=device_no)
                 return
-            was_offline = device.status != 1
-            device.status = 1
+            device, community_id = row
+            was_offline = device.status != DeviceStatus.ONLINE
+            device.status = DeviceStatus.ONLINE
             device.last_heartbeat = received_at
-        if was_offline:
-            # M7 will replace this placeholder with the WebSocket broadcast.
-            log.info("DEVICE_STATUS", device_no=device_no, status=1)
+        if was_offline and self.realtime is not None:
+            await self.realtime.device(device, community_id)
 
         key = f"device:health:{device_no}"
         try:

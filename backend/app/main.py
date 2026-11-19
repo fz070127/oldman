@@ -24,7 +24,13 @@ from app.core.response import R
 from app.mqtt.client import MqttClient
 from app.mqtt.handlers import MqttHandlers
 from app.mqtt.publisher import MqttPublisher
+from app.services.device_presence import DevicePresence
 from app.services.escalation_service import EscalationEngine
+from app.ws.manager import ConnectionManager
+from app.ws.publisher import RealtimePublisher
+
+if sys.platform == "win32":
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 DependencyStatus = Literal["up", "down"]
 
@@ -78,12 +84,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             sessions = application.state.db_sessionmaker = async_sessionmaker(
                 engine, expire_on_commit=False
             )
-            escalation = application.state.escalation = EscalationEngine(settings, sessions, redis)
-            sessions.configure(info={"escalation": escalation})
+            realtime = RealtimePublisher(application.state.connections, sessions)
+            escalation = application.state.escalation = EscalationEngine(
+                settings, sessions, redis, realtime=realtime
+            )
+            sessions.configure(info={"escalation": escalation, "realtime": realtime})
             mqtt = MqttClient(settings)
             application.state.mqtt = mqtt
             publisher = application.state.mqtt_publisher = MqttPublisher(mqtt, sessions)
-            handlers = MqttHandlers(sessions, redis, publisher)
+            handlers = MqttHandlers(sessions, redis, publisher, realtime)
+            presence = DevicePresence(sessions, realtime)
             workers = [
                 asyncio.create_task(escalation.run(), name="alarm-escalation"),
                 asyncio.create_task(
@@ -96,6 +106,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     ),
                     name="mqtt-subscriber",
                 ),
+                asyncio.create_task(presence.run(), name="device-presence"),
             ]
             try:
                 yield
@@ -106,6 +117,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     application = FastAPI(title="银铃守护 API", version="1.0.0", lifespan=lifespan)
     application.state.settings = settings
+    application.state.connections = ConnectionManager()
     register_handlers(application)
     application.add_middleware(
         CORSMiddleware,

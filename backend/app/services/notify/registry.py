@@ -8,10 +8,11 @@ from app.services.notify.mock import MockNotifier
 from app.services.notify.push import PushNotifier
 from app.services.notify.sms import SmsNotifier
 from app.services.notify.ws import WsNotifier
+from app.ws.manager import ConnectionManager
 
 
 def build_registry(
-    provider: str, sessions: async_sessionmaker[AsyncSession]
+    provider: str, sessions: async_sessionmaker[AsyncSession], connections: ConnectionManager | None
 ) -> dict[str, Notifier]:
     external = (
         (MockNotifier(Channel.PUSH), MockNotifier(Channel.SMS), MockNotifier(Channel.CALL))
@@ -20,5 +21,5 @@ def build_registry(
     )
     return {
         notifier.channel: notifier
-        for notifier in (*external, InboxNotifier(sessions), WsNotifier())
+        for notifier in (*external, InboxNotifier(sessions), WsNotifier(connections))
     }

@@ -1,18 +1,20 @@
 from app.models.enums import Channel
 from app.services.notify.base import Notifier, NotifyResult
-
-
-async def broadcast_to_user(user_id: str, msg: dict) -> bool:
-    # M7 will connect this entry point to the WebSocket connection manager.
-    return False
+from app.ws.manager import ConnectionManager
 
 
 class WsNotifier(Notifier):
     channel = Channel.WS
 
+    def __init__(self, connections: ConnectionManager | None = None):
+        self.connections = connections
+
     async def send(self, to: str, title: str, content: str, ctx: dict) -> NotifyResult:
-        sent = await broadcast_to_user(
-            to,
-            {"alarmId": ctx["alarm_id"], "step": ctx["step"], "title": title, "content": content},
+        message = ctx.get("ws_message")
+        count = (
+            await self.connections.broadcast_to_user(to, message)
+            if (self.connections is not None and message is not None)
+            else 0
         )
+        sent = count > 0
         return NotifyResult(sent, self.channel, {} if sent else {"reason": "ws_unavailable"})

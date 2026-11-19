@@ -9,6 +9,7 @@ from app.models import Alarm, AlarmAction, Elder, FamilyBinding, Guardian, User
 from app.models.enums import Action, Channel, RoleCode
 from app.services.escalation_rules import EscalationRules, Rule, Target
 from app.services.notify.base import Notifier, NotifyResult
+from app.ws.publisher import alarm_update
 
 log = structlog.get_logger()
 RETRY_DELAYS = (2, 5)
@@ -65,12 +66,13 @@ async def notify_new_alarm(
     sessions: async_sessionmaker[AsyncSession],
     rules: EscalationRules,
     notifiers: dict[str, Notifier],
+    ws_message: dict | None = None,
 ) -> None:
     rule = rules.target(alarm.level, 0)
     try:
         async with sessions() as db:
             recipient = await find_recipient(db, alarm.elder_id, "family_primary")
-        await notify_alarm(alarm, 0, rule, recipient, sessions, notifiers)
+        await notify_alarm(alarm, 0, rule, recipient, sessions, notifiers, ws_message=ws_message)
     except Exception:
         log.exception("alarm_notification_error", alarm_id=alarm.id, step=0)
 
@@ -82,8 +84,14 @@ async def notify_alarm(
     recipient: User | None,
     sessions: async_sessionmaker[AsyncSession],
     notifiers: dict[str, Notifier],
+    *,
+    ws_message: dict | None = None,
 ) -> None:
     ctx = {"alarm_id": alarm.id, "user_id": recipient.id if recipient else None, "step": step}
+    if Channel.WS in rule.channels:
+        ctx["ws_message"] = (
+            alarm_update(alarm, recipient.nickname if recipient else None) if step else ws_message
+        )
     title = "告警升级" if step else "新告警"
     content = f"{alarm.level} 告警，请查看告警详情并确认。"
     results = await asyncio.gather(

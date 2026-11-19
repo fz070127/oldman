@@ -86,4 +86,12 @@ $env:ESCALATE_POLL_INTERVAL_SEC = '0.1'
 
 Redis 使用 ZSET `alarm:escalate` 跨 API 重启保留任务。Redis 不可用时，扫描器记录 `alarm_escalation_redis_degraded` 警告并使用进程内 `asyncio.PriorityQueue`。**服务重启会丢失尚在内存中的任务**。Redis 恢复连接后，扫描器把内存中仍在等待的任务写回 ZSET。独立运行的 ingest 生产者和扫描器若需在 Redis 离线时协作，须共享同一个进程内的 `EscalationEngine`。
 
-`NOTIFY_PROVIDER=mock` 是默认值，PUSH、SMS、CALL 记录 mock 日志。选 `aliyun` 可走供应商骨架，M6 骨架记录警告后调用 mock。INBOX 写入 M2 的 notification 表，WS 调用 M7 占位函数并返回失败。每个渠道独立发送、重试和写流水，重试间隔为 2 秒、5 秒。NOTIFY 流水的 `detail.attempts` 表示实际尝试次数。任一渠道失败均保留已提交的告警。
+`NOTIFY_PROVIDER=mock` 是默认值，PUSH、SMS、CALL 记录 mock 日志。选 `aliyun` 可走供应商骨架，M6 骨架记录警告后调用 mock。INBOX 写入 M2 的 notification 表，WS 向目标用户已连接的 WebSocket 投递。每个渠道独立发送、重试和写流水，重试间隔为 2 秒、5 秒。NOTIFY 流水的 `detail.attempts` 表示实际尝试次数。任一渠道失败均保留已提交的告警。
+
+## WebSocket 与看板（M7）
+
+- 使用 `ws://<host>/api/v1/ws?token=<accessToken>` 连接，每 30 秒发 `{"type":"PING"}`，收到 `{"type":"PONG"}`。无效访问令牌关闭码 `4401`，60 秒无消息关闭码 `4408`。重连后通过 `/api/v1/alarms/pending-count` 补数。
+- `ALARM_NEW`、`ALARM_UPDATE` 按老人绑定关系和社区权限广播，`DEVICE_STATUS` 推给管理员及设备绑定社区的看板用户。WS 连接保存在进程内，演示使用单 worker。
+- 设备上报心跳后上线；距最后一次心跳超过 90 秒后，由每 30 秒运行的扫描器置为离线并广播。断开 broker 不会立即让所有设备离线：正常情况下推送在最后心跳后的 90–120 秒内到达。
+- `/api/v1/dashboard` 的五个接口要求 `dashboard:read`，社区用户仅查看本社区。趋势以北京时间按日聚合，`days` 取 1–90，默认 7，缺失日期补零；社区坐标是稳定的归一化演示坐标，不代表实际地理位置。
+- Windows 建议直接运行 `python -m app.main`。通过 Uvicorn CLI 启动时保留 `--loop asyncio:SelectorEventLoop`，不要依赖导入应用后才设置事件循环策略。Windows Selector 不支持 asyncio 异步子进程，当前后端不使用该能力。

@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 from datetime import UTC, date, datetime, timedelta
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import httpx
@@ -188,6 +188,12 @@ async def records_server(monkeypatch):
                 # 这里用无 spec 的 AsyncMock，再由测试显式设定各方法行为。
                 app.state.redis = AsyncMock()
                 app.state.redis.exists.return_value = 0
+                # pipeline() 在 redis-py 里是同步方法，返回可作为 async 上下文管理器的对象。
+                # AsyncMock 会把它变成协程，业务代码的 `async with` 会失败，所以用 Mock。
+                pipeline = AsyncMock()
+                pipeline.__aenter__.return_value = pipeline
+                pipeline.__aexit__.return_value = False
+                app.state.redis.pipeline = Mock(return_value=pipeline)
             yield app, client, headers, factory
     finally:
         await engine.dispose()

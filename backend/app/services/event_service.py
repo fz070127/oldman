@@ -177,7 +177,7 @@ async def ingest(
     if alarm is not None:
         try:
             if escalation is not None:
-                await escalation.new_alarm(alarm)
+                await escalation.new_alarm(alarm, event, elder)
             else:
                 settings = Settings()
                 sessions = async_sessionmaker(db.bind, expire_on_commit=False)

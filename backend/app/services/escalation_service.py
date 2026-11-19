@@ -10,13 +10,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import Settings
-from app.models import Alarm, AlarmAction
-from app.models.enums import Action
+from app.models import Alarm, AlarmAction, Elder, Event
+from app.models.enums import Action, Channel
 from app.models.enums import AlarmStatus as S
 from app.services import alarm_service
 from app.services.escalation_rules import EscalationRules
 from app.services.notify import dispatcher
 from app.services.notify.registry import build_registry
+from app.ws.publisher import RealtimePublisher, alarm_update
 
 log = structlog.get_logger()
 QUEUE_KEY = "alarm:escalate"
@@ -105,20 +106,44 @@ class EscalationQueue:
 
 class EscalationEngine:
     def __init__(
-        self, settings: Settings, sessions: async_sessionmaker[AsyncSession], redis: Redis
+        self,
+        settings: Settings,
+        sessions: async_sessionmaker[AsyncSession],
+        redis: Redis,
+        *,
+        realtime: RealtimePublisher | None = None,
     ):
         self.sessions = sessions
         self.rules = EscalationRules(settings)
         self.queue = EscalationQueue(redis)
-        self.notifiers = build_registry(settings.notify_provider, sessions)
+        self.realtime = realtime
+        self.notifiers = build_registry(
+            settings.notify_provider, sessions, realtime.connections if realtime else None
+        )
         self.interval = settings.escalate_poll_interval_sec
         self.deliveries: set[asyncio.Task] = set()
         self.reconciled_state: tuple[int, bool] | None = None
 
-    async def new_alarm(self, alarm: Alarm) -> None:
+    async def new_alarm(
+        self, alarm: Alarm, event: Event | None = None, elder: Elder | None = None
+    ) -> None:
+        message = None
+        if self.realtime is not None and event is not None and elder is not None:
+            rule = self.rules.target(alarm.level, 0)
+            message = await self.realtime.new_alarm(
+                alarm,
+                event,
+                elder,
+                self.rules,
+                exclude_user_id=alarm.current_handler if Channel.WS in rule.channels else None,
+            )
         await self.schedule(alarm, 1)
         await dispatcher.notify_new_alarm(
-            alarm, sessions=self.sessions, rules=self.rules, notifiers=self.notifiers
+            alarm,
+            sessions=self.sessions,
+            rules=self.rules,
+            notifiers=self.notifiers,
+            ws_message=message,
         )
 
     async def schedule(self, alarm: Alarm, step: int) -> None:
@@ -194,6 +219,12 @@ class EscalationEngine:
             target=rule.to,
             late_sec=round(now.timestamp() - due, 3),
         )
+        if self.realtime is not None:
+            await self.realtime.alarm(
+                alarm.elder_id,
+                alarm_update(alarm, recipient.nickname if recipient else None),
+                exclude_user_id=alarm.current_handler if Channel.WS in rule.channels else None,
+            )
         self.start_delivery(
             dispatcher.notify_alarm(alarm, step, rule, recipient, self.sessions, self.notifiers)
         )

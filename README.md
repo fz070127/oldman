@@ -31,7 +31,7 @@ python -m venv .venv
 cp .env.example .env
 .venv/Scripts/python.exe -m alembic upgrade head
 .venv/Scripts/python.exe -m app.db.seed
-.venv/Scripts/python.exe -m uvicorn app.main:app --reload
+.venv/Scripts/python.exe -m uvicorn app.main:app --reload --loop asyncio:SelectorEventLoop
 ```
 
 服务默认监听 8000，`/health` 返回存活状态，`/docs` 是 Swagger UI。
