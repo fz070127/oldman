@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="loading" class="device-detail-page">
+  <div v-loading="loading && Boolean(device)" class="device-detail-page">
     <PageContainer :title="device ? `设备详情 · ${device.deviceNo}` : '设备详情'">
       <template #extra>
         <el-button :icon="ArrowLeft" @click="router.push('/device')">返回列表</el-button>
@@ -9,15 +9,36 @@
           type="warning"
           plain
           :loading="rebooting"
+          :disabled="rebooting"
           @click="handleReboot"
         >
           远程重启
         </el-button>
       </template>
 
-      <EmptyState v-if="!loading && !device" description="未找到该设备信息" />
+      <div v-if="loading && !device" class="detail-skeleton">
+        <el-skeleton :rows="10" animated />
+      </div>
 
-      <div v-else-if="device" class="device-detail__content">
+      <EmptyState
+        v-else-if="loadError"
+        mode="error"
+        title="设备详情加载失败"
+        description="网络连接异常或服务暂不可用，请检查网络连接后重试"
+        action-text="加载失败，点击重试"
+        @action="loadData"
+      />
+
+      <EmptyState
+        v-else-if="!device"
+        mode="empty"
+        title="未找到该设备信息"
+        description="该设备可能已被移除或设备编号有误"
+        action-text="返回列表"
+        @action="router.push('/device')"
+      />
+
+      <div v-else class="device-detail__content">
         <!-- 1. 基本信息 -->
         <section class="detail-block">
           <h3 class="detail-block__title">一、设备基本信息</h3>
@@ -141,7 +162,12 @@
                   </el-form-item>
 
                   <el-form-item>
-                    <el-button type="primary" :loading="savingConfig" @click="saveConfig">
+                    <el-button
+                      type="primary"
+                      :loading="savingConfig"
+                      :disabled="savingConfig"
+                      @click="saveConfig"
+                    >
                       保存配置
                     </el-button>
                   </el-form-item>
@@ -205,20 +231,17 @@
       </el-form>
       <template #footer>
         <el-button @click="editVisible = false">取 消</el-button>
-        <el-button type="primary" :loading="savingEdit" @click="submitEdit">保 存</el-button>
+        <el-button type="primary" :loading="savingEdit" :disabled="savingEdit" @click="submitEdit">
+          保 存
+        </el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import * as echarts from 'echarts/core'
-import { LineChart } from 'echarts/charts'
-import { GridComponent, LegendComponent, TooltipComponent } from 'echarts/components'
-import { CanvasRenderer } from 'echarts/renderers'
-
-echarts.use([LineChart, GridComponent, LegendComponent, TooltipComponent, CanvasRenderer])
 import dayjs from 'dayjs'
+import { echarts, type ECharts } from '@/views/screen/echarts'
 import type { FormInstance, FormRules } from 'element-plus'
 import { ArrowLeft, Edit } from '@element-plus/icons-vue'
 import {
@@ -249,6 +272,7 @@ const router = useRouter()
 
 const deviceId = computed(() => String(route.params.id || ''))
 const loading = ref(false)
+const loadError = ref(false)
 const device = ref<Device | null>(null)
 const health = ref<DeviceHealth | null>(null)
 
@@ -334,13 +358,20 @@ const configForm = reactive({ sensitivity: 0.7 })
 const quietHoursText = ref('')
 
 async function saveConfig() {
-  if (!device.value) return
+  if (!device.value || savingConfig.value) return
+  const quietHours = quietHoursText.value
+    .split(/[,，]/)
+    .map((s) => s.trim())
+    .filter(Boolean)
+  const timeRangeReg = /^\d{2}:\d{2}-\d{2}:\d{2}$/
+  for (const item of quietHours) {
+    if (!timeRangeReg.test(item)) {
+      ElMessage.warning(`免打扰时段「${item}」格式错误，请使用 HH:mm-HH:mm 格式（如 22:00-06:00）`)
+      return
+    }
+  }
   savingConfig.value = true
   try {
-    const quietHours = quietHoursText.value
-      .split(/[,，]/)
-      .map((s) => s.trim())
-      .filter(Boolean)
     const updated = await updateDeviceConfig(device.value.id, {
       roi: device.value.config.roi,
       furniture: device.value.config.furniture,
@@ -356,7 +387,7 @@ async function saveConfig() {
 
 // ---------------- ECharts 24h 健康折线图 ----------------
 const chartRef = ref<HTMLElement>()
-let chartInst: echarts.ECharts | null = null
+let chartInst: ECharts | null = null
 
 function renderChart() {
   if (!chartRef.value || !health.value) return
@@ -400,6 +431,7 @@ function handleResize() {
 async function loadData() {
   if (!deviceId.value) return
   loading.value = true
+  loadError.value = false
   try {
     const [dev, h] = await Promise.all([
       getDeviceDetail(deviceId.value),
@@ -412,6 +444,8 @@ async function loadData() {
     await nextTick()
     updateStageSize()
     renderChart()
+  } catch {
+    loadError.value = true
   } finally {
     loading.value = false
   }
@@ -420,7 +454,12 @@ async function loadData() {
 // ---------------- 重启与编辑 ----------------
 const rebooting = ref(false)
 async function handleReboot() {
-  if (!device.value) return
+  if (!device.value || rebooting.value) return
+  await ElMessageBox.confirm(
+    `确定向设备「${device.value.deviceNo}」下发远程重启指令吗？重启期间设备将短暂离线。`,
+    '远程重启确认',
+    { type: 'warning', confirmButtonText: '确定重启', cancelButtonText: '取消' },
+  )
   rebooting.value = true
   try {
     await rebootDevice(device.value.id)

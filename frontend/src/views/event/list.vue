@@ -437,6 +437,12 @@ const handlingId = ref('')
 
 async function quickHandle(row: EventItem, result: EventHandleResult) {
   const isFalse = result === EventHandleResult.FALSE_POSITIVE
+  const label = isFalse ? '标记为误报' : '确认事件属实'
+  await ElMessageBox.confirm(
+    `确定将老人「${row.elderName}」的该条事件${label}吗？`,
+    '事件复核确认',
+    { type: isFalse ? 'warning' : 'info', confirmButtonText: '确定提交', cancelButtonText: '取消' },
+  )
   const defaultRemark = isFalse ? '列表快捷标记误报' : '列表快捷确认属实'
   handlingId.value = row.id
   try {

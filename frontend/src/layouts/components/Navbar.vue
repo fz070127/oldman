@@ -12,8 +12,12 @@
         <Fold v-else />
       </el-icon>
       <el-breadcrumb separator="/">
-        <el-breadcrumb-item v-for="item in breadcrumbs" :key="item.path">
-          {{ item.meta.title }}
+        <el-breadcrumb-item
+          v-for="item in breadcrumbs"
+          :key="item.path"
+          :to="item.to ? { path: item.to } : undefined"
+        >
+          {{ item.title }}
         </el-breadcrumb-item>
       </el-breadcrumb>
     </div>
@@ -187,8 +191,34 @@ function goAlarm() {
   if (router.hasRoute('Alarm')) router.push('/alarm')
 }
 
-/** 面包屑：取匹配链上有标题的路由 */
-const breadcrumbs = computed(() => route.matched.filter((r) => r.meta?.title))
+/** 面包屑：取匹配链上有标题的路由，详情页自动补齐上级列表面包屑 */
+const PARENT_BREADCRUMB_MAP: Record<string, { title: string; path: string }> = {
+  elder: { title: '老人档案', path: '/elder' },
+  device: { title: '设备管理', path: '/device' },
+  event: { title: '事件中心', path: '/event' },
+}
+
+const breadcrumbs = computed(() => {
+  const matched = route.matched
+    .filter((r) => r.meta?.title)
+    .map((r) => ({
+      path: r.path,
+      title: String(r.meta.title),
+      to: undefined as string | undefined,
+    }))
+  const menuKey = String(route.meta?.menuKey || '')
+  if (route.meta?.hidden && PARENT_BREADCRUMB_MAP[menuKey]) {
+    const parent = PARENT_BREADCRUMB_MAP[menuKey]
+    if (!matched.some((m) => m.title === parent.title)) {
+      matched.unshift({
+        path: parent.path,
+        title: parent.title,
+        to: parent.path,
+      })
+    }
+  }
+  return matched
+})
 
 const searchOpen = ref(false)
 const keyword = ref('')
