@@ -8,6 +8,7 @@ from app.models.elder import Elder
 from app.models.event import Event
 from app.models.family_binding import FamilyBinding
 from app.models.guardian import Guardian
+from app.models.mqtt_cmd_log import MqttCmdLog
 from app.models.notification import Notification
 from app.models.role import Role
 from app.models.user import User
@@ -23,6 +24,7 @@ __all__ = [
     "Event",
     "FamilyBinding",
     "Guardian",
+    "MqttCmdLog",
     "Notification",
     "Role",
     "User",

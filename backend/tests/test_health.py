@@ -12,11 +12,12 @@ from app.main import create_app
 
 
 @pytest.fixture
-async def service():
+async def service(unused_tcp_port):
     settings = Settings(
         _env_file=None,
         database_url="postgresql+asyncpg://localhost/test",
         redis_url="redis://localhost/0",
+        mqtt_port=unused_tcp_port,
         cors_origins=["http://localhost:5173"],
     )
     app = create_app(settings)
@@ -38,7 +39,8 @@ async def service():
 
 @pytest.mark.parametrize("db_up", [True, False])
 @pytest.mark.parametrize("redis_up", [True, False])
-async def test_health(service, db_up, redis_up):
+@pytest.mark.parametrize("mqtt_up", [True, False])
+async def test_health(service, db_up, redis_up, mqtt_up):
     app, client = service
     connection = AsyncMock()
     pool = MagicMock()
@@ -50,6 +52,7 @@ async def test_health(service, db_up, redis_up):
     app.state.redis.ping.return_value = True
     if not redis_up:
         app.state.redis.ping.side_effect = ConnectionRefusedError()
+    app.state.mqtt = MagicMock(connected=mqtt_up)
 
     response = await client.get("/health")
     trace = response.headers["X-Trace-Id"]
@@ -62,6 +65,7 @@ async def test_health(service, db_up, redis_up):
             "status": "up",
             "db": "up" if db_up else "down",
             "redis": "up" if redis_up else "down",
+            "mqtt": "up" if mqtt_up else "down",
         },
         "traceId": trace,
     }

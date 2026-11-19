@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from contextlib import AsyncExitStack, asynccontextmanager
 from typing import Literal
 
@@ -20,6 +21,9 @@ from app.core.config import Settings
 from app.core.exceptions import register_handlers
 from app.core.logging import TraceMiddleware, configure_logging
 from app.core.response import R
+from app.mqtt.client import MqttClient
+from app.mqtt.handlers import MqttHandlers
+from app.mqtt.publisher import MqttPublisher
 from app.services.escalation_service import EscalationEngine
 
 DependencyStatus = Literal["up", "down"]
@@ -29,6 +33,7 @@ class HealthData(BaseModel):
     status: Literal["up"]
     db: DependencyStatus
     redis: DependencyStatus
+    mqtt: DependencyStatus
 
 
 class HealthResponse(BaseModel):
@@ -75,12 +80,29 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             )
             escalation = application.state.escalation = EscalationEngine(settings, sessions, redis)
             sessions.configure(info={"escalation": escalation})
-            worker = asyncio.create_task(escalation.run(), name="alarm-escalation")
+            mqtt = MqttClient(settings)
+            application.state.mqtt = mqtt
+            publisher = application.state.mqtt_publisher = MqttPublisher(mqtt, sessions)
+            handlers = MqttHandlers(sessions, redis, publisher)
+            workers = [
+                asyncio.create_task(escalation.run(), name="alarm-escalation"),
+                asyncio.create_task(
+                    mqtt.run(
+                        {
+                            "heartbeat": handlers.on_heartbeat,
+                            "event": handlers.on_event,
+                            "cmd/reply": handlers.on_cmd_reply,
+                        }
+                    ),
+                    name="mqtt-subscriber",
+                ),
+            ]
             try:
                 yield
             finally:
-                worker.cancel()
-                await asyncio.gather(worker, return_exceptions=True)
+                for worker in workers:
+                    worker.cancel()
+                await asyncio.gather(*workers, return_exceptions=True)
 
     application = FastAPI(title="银铃守护 API", version="1.0.0", lifespan=lifespan)
     application.state.settings = settings
@@ -103,7 +125,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         db, redis = await asyncio.gather(
             check_database(request.app.state.db), check_redis(request.app.state.redis)
         )
-        return R.ok({"status": "up", "db": db, "redis": redis})
+        mqtt = "up" if request.app.state.mqtt.connected else "down"
+        return R.ok({"status": "up", "db": db, "redis": redis, "mqtt": mqtt})
 
     return application
 
@@ -111,4 +134,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 app = create_app()
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=Settings().app_port)
+    loop = "asyncio:SelectorEventLoop" if sys.platform == "win32" else "auto"
+    uvicorn.run(app, host="0.0.0.0", port=Settings().app_port, loop=loop)

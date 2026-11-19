@@ -1,4 +1,5 @@
 import asyncio
+import json
 import os
 from datetime import UTC, date, datetime, timedelta
 from unittest.mock import AsyncMock
@@ -23,10 +24,13 @@ from app.models import (
     Event,
     FamilyBinding,
     Guardian,
+    MqttCmdLog,
     Role,
     User,
 )
 from app.models.enums import RoleCode
+from app.mqtt.handlers import MqttHandlers
+from app.mqtt.publisher import MqttPublisher
 
 ACCOUNTS = {
     "admin": (RoleCode.ADMIN, None),
@@ -198,6 +202,35 @@ async def records_app(records_server):
     return client, headers, factory
 
 
+async def test_mqtt_command_reply_and_timeout(records_server):
+    app, _, _, factory = records_server
+    mqtt = AsyncMock()
+    publisher = MqttPublisher(mqtt, factory)
+    handlers = MqttHandlers(factory, app.state.redis, publisher)
+
+    async def reply_before_publish_returns(topic, message):
+        assert topic == "edge/EDGE-001/cmd"
+        assert json.loads(message) == {"cmd": "restart", "payload": {}}
+        assert not await publisher.publish_cmd("EDGE-001", "restart", {})
+        await handlers.on_cmd_reply("EDGE-002", b'{"cmd":"restart","ok":true}')
+        await handlers.on_cmd_reply("EDGE-001", b'{"cmd":"restart","ok":"true"}')
+        await handlers.on_cmd_reply("EDGE-001", b'{"cmd":"restart","ok":true,"msg":"done"}')
+
+    mqtt.publish.side_effect = reply_before_publish_returns
+    assert await publisher.publish_cmd("EDGE-001", "restart", {})
+    mqtt.publish.side_effect = None
+    assert not await publisher.publish_cmd("EDGE-001", "restart", {}, timeout=0.02)
+
+    async with factory() as db:
+        commands = list(await db.scalars(select(MqttCmdLog).order_by(MqttCmdLog.created_at)))
+    assert [(command.status, command.reply_message) for command in commands] == [
+        ("ACKNOWLEDGED", "done"),
+        ("TIMEOUT", None),
+    ]
+    assert all(command.completed_at is not None for command in commands)
+    assert not publisher.pending
+
+
 def response_data(response, *, status=200, code=0):
     assert response.status_code == status
     payload = response.json()
@@ -318,8 +351,8 @@ async def test_elder_mutations_bindings_and_audit(records_app):
         assert audits[3].detail["familyBinding"]["operation"] == "remove"
 
 
-async def test_device_scope_config_and_uniqueness(records_app, monkeypatch):
-    client, headers, factory = records_app
+async def test_device_scope_config_and_uniqueness(records_server, monkeypatch):
+    app, client, headers, factory = records_server
     admin, manager, guardian = (headers[uid] for uid in ("admin", "community01", "guardian01"))
     data = response_data(await client.get("devices", headers=admin))
     assert [item["id"] for item in data["list"]] == ["D001", "D002", "D003"]
@@ -336,8 +369,13 @@ async def test_device_scope_config_and_uniqueness(records_app, monkeypatch):
         permissions.setitem(ROLE_PERMISSIONS, RoleCode.GUARDIAN, ("device:read",))
         scoped = response_data(await client.get("devices", headers=guardian))
         assert [item["id"] for item in scoped["list"]] == ["D001"]
+    publisher = app.state.mqtt_publisher = AsyncMock()
+    publisher.publish_cmd.side_effect = [False, True]
     response_data(await client.post("devices/D001/reboot", headers=manager), code=5001)
     response_data(await client.post("devices/D002/reboot", headers=manager), code=1004)
+    response_data(await client.post("devices/D001/reboot", headers=manager))
+    assert publisher.publish_cmd.await_count == 2
+    publisher.publish_cmd.assert_awaited_with("EDGE-001", "restart", {})
     body = {"deviceNo": "NEW-001", "elderId": "E004", "type": 1, "installAddr": "幸福里"}
     for invalid in ({"elderId": "E001"}, {"deviceNo": "EDGE-001"}):
         response_data(
