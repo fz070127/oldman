@@ -1,0 +1,21 @@
+device_no: EDGE-0001
+elder_id: E001
+# Select exactly one source. Paths are relative to this YAML file.
+video_file: ../algo/data/processed/clips/fall-01.mp4
+# rtsp_url: rtsp://192.168.1.20/stream
+# camera_index: 0
+fps_fallback: 30
+downsample: 1
+roi: []
+mqtt:
+  host: localhost
+  port: 1883
+  topic_prefix: edge
+store: .cache/EDGE-0001.sqlite3
+heartbeat_sec: 30
+detector:
+  rules: ../algo/configs/detector.yaml
+  weights: ../algo/data/processed/weights/yolov8n-pose.pt
+  motion_window_sec: 2.0
+  cpu_threads: 4
+  imgsz: 640
