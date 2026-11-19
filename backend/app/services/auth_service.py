@@ -12,6 +12,7 @@ from app.models import User
 from app.services.audit_service import AuditService
 from app.services.auth_redis import AuthRedis
 
+# Public dummy hash equalizes bcrypt work for unknown usernames.
 DUMMY_PASSWORD_HASH = "$2b$12$taEAQ7ZddoQmjLrHjZamzeFmXtmWUKsq.z/PZUoqF9GHQJXKCeqCu"
 
 

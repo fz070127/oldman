@@ -1,0 +1,14 @@
+**
+!frontend/
+!frontend/**
+!frontend-h5/
+!frontend-h5/**
+!deploy/
+!deploy/nginx.conf
+
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.env
+**/.env.*
+!frontend/.env.production

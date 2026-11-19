@@ -108,3 +108,30 @@ async def test_docs_and_router(service):
     assert docs.headers["X-Trace-Id"] != schema.headers["X-Trace-Id"]
     assert "/health" in schema.json()["paths"]
     assert router.prefix == "/api/v1"
+
+
+async def test_business_openapi_declares_response_payloads(service):
+    _, client = service
+    schema = (await client.get("/openapi.json")).json()
+    definitions = schema["components"]["schemas"]
+
+    def resolve(model):
+        return definitions[model["$ref"].rsplit("/", 1)[-1]]
+
+    operations = [
+        route
+        for path, methods in schema["paths"].items()
+        if path.startswith("/api/v1/")
+        for route in methods.values()
+    ]
+    assert len(operations) == 36
+    for operation in operations:
+        outcome = operation["responses"].get("201") or operation["responses"]["200"]
+        fields = resolve(outcome["content"]["application/json"]["schema"])["properties"]
+        assert set(fields) == {"code", "message", "data", "traceId"}
+
+    alarm_response = schema["paths"]["/api/v1/alarms/{id}"]["get"]["responses"]["200"]
+    payload = resolve(alarm_response["content"]["application/json"]["schema"])
+    alarm = resolve(payload["properties"]["data"]["anyOf"][0])["properties"]
+    assert alarm["createdAt"]["format"] == "date-time"
+    assert {"event", "elder", "timeline", "actions"} <= alarm.keys()

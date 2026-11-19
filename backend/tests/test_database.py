@@ -5,6 +5,7 @@ from collections import Counter
 from contextlib import aclosing
 from datetime import timedelta
 from pathlib import Path
+from secrets import token_urlsafe
 from uuid import uuid4
 
 import bcrypt
@@ -16,7 +17,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from alembic import command
-from app.db.seed import CHINA, refresh_pending, seed
+from app.db.seed import CHINA, refresh_demo, seed
 from app.db.session import get_db
 from app.models import Alarm, AlarmAction, Base, Device, Elder, Event, User
 
@@ -168,7 +169,9 @@ async def table_counts(connection):
     }
 
 
-async def test_seed_distribution_and_idempotence(migrated):
+async def test_seed_distribution_and_idempotence(migrated, monkeypatch):
+    password = token_urlsafe(18)
+    monkeypatch.setenv("DEMO_SEED_PASSWORD", password)
     factory = async_sessionmaker(migrated, join_transaction_mode="create_savepoint")
     async with factory.begin() as session:
         assert await seed(session) == 500
@@ -201,7 +204,8 @@ async def test_seed_distribution_and_idempotence(migrated):
             | {f"community{i:02}" for i in range(1, 6)}
         )
         assert bcrypt.checkpw(
-            b"123456", next(u.password_hash for u in users if u.username == "admin").encode()
+            password.encode(),
+            next(u.password_hash for u in users if u.username == "admin").encode(),
         )
         devices = list(await session.scalars(select(Device)))
         elders = list(await session.scalars(select(Elder)))
@@ -267,7 +271,10 @@ async def test_seed_distribution_and_idempotence(migrated):
         )
         query = select(Alarm.__table__).order_by(Alarm.id)
         before = (await session.execute(query)).mappings().all()
-        assert await refresh_pending(session) == 25
+        await session.execute(update(Device).values(status=2, last_heartbeat=stale))
+        session.add(Device(id="NON-DEMO", device_no="UNRELATED", type=1, status=0))
+        await session.flush()
+        assert await refresh_demo(session) == (25, 90)
         after = (await session.execute(query)).mappings().all()
         refreshed = 0
         now = await session.scalar(select(func.clock_timestamp()))
@@ -284,6 +291,34 @@ async def test_seed_distribution_and_idempotence(migrated):
             else:
                 assert old == new
         assert refreshed == 25
-        assert await refresh_pending(session) == 0
+        device_query = select(Device.id, Device.status, Device.last_heartbeat).order_by(Device.id)
+        devices = (await session.execute(device_query)).all()
+        assert [status for _, status, _ in devices] == [1] * 85 + [2] * 5 + [0]
+        assert all(
+            timedelta(0) <= now - heartbeat < timedelta(seconds=10)
+            for _, _, heartbeat in devices[:85]
+        )
+        assert all(
+            timedelta(hours=3) <= now - heartbeat < timedelta(hours=3, seconds=5)
+            for _, _, heartbeat in devices[85:90]
+        )
+        assert devices[-1] == ("NON-DEMO", 0, None)
+        assert await refresh_demo(session) == (0, 0)
         assert (await session.execute(query)).mappings().all() == after
-    assert await table_counts(migrated) == counts
+        assert (await session.execute(device_query)).all() == devices
+    assert await table_counts(migrated) == {**counts, "device": 91}
+
+
+async def test_refresh_demo_does_not_create_devices_or_alarms(migrated):
+    async with async_sessionmaker(migrated, join_transaction_mode="create_savepoint").begin() as db:
+        assert await refresh_demo(db) == (0, 0)
+    assert set((await table_counts(migrated)).values()) == {0}
+
+
+async def test_seed_rolls_back_when_demo_password_missing(migrated, monkeypatch):
+    monkeypatch.setenv("DEMO_SEED_PASSWORD", "")
+    factory = async_sessionmaker(migrated, join_transaction_mode="create_savepoint")
+    with pytest.raises(ValueError, match="DEMO_SEED_PASSWORD"):
+        async with factory.begin() as session:
+            await seed(session)
+    assert set((await table_counts(migrated)).values()) == {0}

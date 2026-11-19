@@ -6,6 +6,12 @@ from pydantic.alias_generators import to_camel
 
 from app.core.deps import AccessToken, Auth, CurrentUser, DbSession
 from app.core.response import R
+from app.schemas.responses import (
+    LoginResult,
+    Response,
+    Tokens,
+    UserProfile,
+)
 from app.services.auth_service import user_profile
 
 router = APIRouter(prefix="/auth", tags=["认证"])
@@ -38,28 +44,28 @@ class PasswordBody(AuthBody):
     new_password: Password
 
 
-@router.post("/login")
+@router.post("/login", response_model=Response[LoginResult])
 async def login(body: LoginBody, auth: Auth, db: DbSession) -> dict:
     return R.ok(await auth.login(db, body.username, body.password))
 
 
-@router.post("/refresh")
+@router.post("/refresh", response_model=Response[Tokens])
 async def refresh(body: RefreshBody, auth: Auth, db: DbSession) -> dict:
     return R.ok(await auth.refresh(db, body.refresh_token))
 
 
-@router.post("/logout")
+@router.post("/logout", response_model=Response[None])
 async def logout(user: CurrentUser, token: AccessToken, auth: Auth) -> dict:
     await auth.logout(user, token)
     return R.ok()
 
 
-@router.get("/me")
+@router.get("/me", response_model=Response[UserProfile])
 async def me(user: CurrentUser) -> dict:
     return R.ok(user_profile(user))
 
 
-@router.put("/password")
+@router.put("/password", response_model=Response[None])
 async def change_password(body: PasswordBody, user: CurrentUser, auth: Auth, db: DbSession) -> dict:
     await auth.change_password(db, user, body.old_password, body.new_password)
     return R.ok()

@@ -15,6 +15,14 @@ from app.schemas.records import (
     FamilyBindingCreate,
     RecordId,
 )
+from app.schemas.responses import (
+    ElderDetail,
+    ElderItem,
+    ElderState,
+    FamilyBindingItem,
+    Page,
+    Response,
+)
 from app.services import elder_service
 from app.services.records import commit_and_audit
 
@@ -26,7 +34,7 @@ ElderId = Annotated[RecordId, Path(alias="id")]
 BindingId = Annotated[RecordId, Path(alias="bindingId")]
 
 
-@router.get("", dependencies=[read_elder])
+@router.get("", dependencies=[read_elder], response_model=Response[Page[ElderItem]])
 async def list_elders(
     query: Annotated[ElderFilters, Query()], scope: UserScope, db: DbSession
 ) -> dict:
@@ -34,13 +42,13 @@ async def list_elders(
     return R.page(items, total, query.page, query.page_size)
 
 
-@router.get("/{id}")
+@router.get("/{id}", response_model=Response[ElderDetail])
 async def get_elder(elder_id: ElderId, actor: ElderReader, scope: UserScope, db: DbSession) -> dict:
     full_phone = actor.role_code in (RoleCode.ADMIN, RoleCode.COMMUNITY_ADMIN)
     return R.ok(await elder_service.elder_detail(db, elder_id, scope, full_phone=full_phone))
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, response_model=Response[ElderDetail])
 async def create_elder(body: ElderCreate, actor: ElderWriter, db: DbSession, audit: Audit) -> dict:
     fields = body.model_dump()
     elder = await elder_service.create_elder(db, fields, actor)
@@ -49,7 +57,7 @@ async def create_elder(body: ElderCreate, actor: ElderWriter, db: DbSession, aud
     return R.ok(result)
 
 
-@router.put("/{id}")
+@router.put("/{id}", response_model=Response[ElderDetail])
 async def update_elder(
     elder_id: ElderId,
     body: ElderUpdate,
@@ -71,7 +79,7 @@ async def update_elder(
     return R.ok(result)
 
 
-@router.delete("/{id}")
+@router.delete("/{id}", response_model=Response[ElderState])
 async def disable_elder(
     elder_id: ElderId, actor: ElderWriter, scope: UserScope, db: DbSession, audit: Audit
 ) -> dict:
@@ -81,13 +89,15 @@ async def disable_elder(
     return R.ok({"id": elder_id, "status": elder.status})
 
 
-@router.get("/{id}/bindings", dependencies=[read_elder])
+@router.get(
+    "/{id}/bindings", dependencies=[read_elder], response_model=Response[list[FamilyBindingItem]]
+)
 async def list_bindings(elder_id: ElderId, scope: UserScope, db: DbSession) -> dict:
     await elder_service.find_elder(db, elder_id, scope)
     return R.ok(await elder_service.list_bindings(db, elder_id))
 
 
-@router.post("/{id}/bindings", status_code=201)
+@router.post("/{id}/bindings", status_code=201, response_model=Response[FamilyBindingItem])
 async def add_binding(
     elder_id: ElderId,
     body: FamilyBindingCreate,
@@ -103,7 +113,7 @@ async def add_binding(
     return R.ok(result)
 
 
-@router.delete("/{id}/bindings/{bindingId}")
+@router.delete("/{id}/bindings/{bindingId}", response_model=Response[None])
 async def remove_binding(
     elder_id: ElderId,
     binding_id: BindingId,

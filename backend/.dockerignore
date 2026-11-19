@@ -4,5 +4,9 @@
 !app/**
 !config/
 !config/escalate.yaml
+!alembic.ini
+!alembic/
+!alembic/**
+!docker-entrypoint.sh
 **/__pycache__/
 **/*.pyc

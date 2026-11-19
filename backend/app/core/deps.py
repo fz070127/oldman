@@ -28,7 +28,7 @@ def get_audit_service(request: Request) -> AuditService:
 Audit = Annotated[AuditService, Depends(get_audit_service)]
 
 
-def get_auth_service(request: Request) -> AuthService:
+async def get_auth_service(request: Request) -> AuthService:
     return AuthService(
         TokenIssuer(request.app.state.settings),
         AuthRedis(request.app.state.redis),
@@ -69,7 +69,7 @@ def require_permission(permission: str) -> Callable[[User], Coroutine[Any, Any, 
     return check
 
 
-def get_user_scope(user: CurrentUser) -> ColumnElement[bool] | None:
+async def get_user_scope(user: CurrentUser) -> ColumnElement[bool] | None:
     """Apply the predicate to queries over Elder, joining Elder for related records."""
     if user.role_code == RoleCode.ADMIN:
         return None

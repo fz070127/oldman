@@ -7,6 +7,14 @@ from app.core.response import R
 from app.models import User
 from app.schemas.events import Ack, AlarmFilters, Dispatch, Resolve, StatsRange
 from app.schemas.records import RecordId
+from app.schemas.responses import (
+    AlarmDetail,
+    AlarmItem,
+    AlarmStats,
+    Page,
+    PendingCount,
+    Response,
+)
 from app.services import alarm_service
 from app.services.escalation_rules import EscalationRules
 from app.services.records import commit_and_audit
@@ -17,14 +25,14 @@ read_alarm = Depends(require_permission("alarm:read"))
 AlarmId = Annotated[RecordId, Path(alias="id")]
 
 
-def get_rules(request: Request) -> EscalationRules:
+async def get_rules(request: Request) -> EscalationRules:
     return request.app.state.escalation.rules
 
 
 Rules = Annotated[EscalationRules, Depends(get_rules)]
 
 
-@router.get("", dependencies=[read_alarm])
+@router.get("", dependencies=[read_alarm], response_model=Response[Page[AlarmItem]])
 async def list_alarms(
     query: Annotated[AlarmFilters, Query()], scope: UserScope, db: DbSession, rules: Rules
 ):
@@ -32,17 +40,17 @@ async def list_alarms(
     return R.page(items, total, query.page, query.page_size)
 
 
-@router.get("/pending-count")
+@router.get("/pending-count", response_model=Response[PendingCount])
 async def pending_count(db: DbSession, scope: UserScope):
     return R.ok({"count": await alarm_service.pending_count(db, scope)})
 
 
-@router.get("/stats", dependencies=[read_alarm])
+@router.get("/stats", dependencies=[read_alarm], response_model=Response[AlarmStats])
 async def stats(db: DbSession, scope: UserScope, range: StatsRange = "7d"):
     return R.ok(await alarm_service.alarm_stats(db, range, scope))
 
 
-@router.get("/{id}", dependencies=[read_alarm])
+@router.get("/{id}", dependencies=[read_alarm], response_model=Response[AlarmDetail])
 async def get_alarm(alarm_id: AlarmId, db: DbSession, scope: UserScope, rules: Rules):
     row = await alarm_service.find_alarm(db, alarm_id, scope)
     return R.ok(await alarm_service.alarm_detail(db, row, scope, rules))
@@ -61,7 +69,7 @@ async def update_alarm(db, alarm_id, scope, actor, body, audit, rules):
     return R.ok(data)
 
 
-@router.post("/{id}/ack")
+@router.post("/{id}/ack", response_model=Response[AlarmItem])
 async def ack(
     alarm_id: AlarmId,
     body: Ack,
@@ -74,7 +82,7 @@ async def ack(
     return await update_alarm(db, alarm_id, scope, actor, body, audit, rules)
 
 
-@router.post("/{id}/dispatch")
+@router.post("/{id}/dispatch", response_model=Response[AlarmItem])
 async def dispatch(
     alarm_id: AlarmId,
     body: Dispatch,
@@ -87,7 +95,7 @@ async def dispatch(
     return await update_alarm(db, alarm_id, scope, actor, body, audit, rules)
 
 
-@router.post("/{id}/resolve")
+@router.post("/{id}/resolve", response_model=Response[AlarmItem])
 async def resolve(
     alarm_id: AlarmId,
     body: Resolve,

@@ -4,13 +4,14 @@ import argparse
 import asyncio
 import random
 import secrets
-from datetime import date, datetime, time, timedelta, timezone
+from datetime import date, datetime, time, timedelta
 
 import bcrypt
-from sqlalchemy import insert, select, update
+from sqlalchemy import insert, or_, select, update
 from sqlalchemy.dialects.postgresql import insert as pg_insert
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.core.config import Settings
 from app.core.permissions import ROLE_PERMISSIONS
 from app.db.session import get_engine
 from app.models import (
@@ -37,8 +38,10 @@ from app.models.enums import (
     HandleResult,
     RoleCode,
 )
+from app.schemas.records import CHINA
 
-CHINA = timezone(timedelta(hours=8))
+DEMO_ONLINE_COUNT = 85
+DEMO_DEVICE_COUNT = 90
 COMMUNITIES = ("幸福里社区", "安康苑", "长乐新村", "夕阳红家园", "康宁小区")
 SURNAMES = "王李张刘陈杨黄赵吴周"
 GIVEN_NAMES = ("秀兰", "建国", "桂芳", "志强", "玉梅", "国平", "淑芬", "德明", "春华", "永安")
@@ -115,12 +118,17 @@ async def seed_directory(session, now):
     existing = set(
         await session.scalars(select(User.id).where(User.id.in_([a[0] for a in accounts])))
     )
+    demo_password = Settings().demo_seed_password.get_secret_value().encode()
+    if not 1 <= len(demo_password) <= 72 and any(
+        username not in existing and username != "SYSTEM" for username, *_ in accounts
+    ):
+        raise ValueError("首次填充演示账号需要设置 DEMO_SEED_PASSWORD（1～72 字节）")
     users = []
     for number, (username, nickname, role, cid) in enumerate(accounts):
         if username in existing:
             continue
         system = username == "SYSTEM"
-        password = secrets.token_bytes(32) if system else b"123456"
+        password = secrets.token_bytes(32) if system else demo_password
         password_hash = bcrypt.hashpw(password, bcrypt.gensalt()).decode()
         users.append(
             {
@@ -213,10 +221,11 @@ async def seed_directory(session, now):
                 "install_addr": elders[i - 1]["address"] + elders[i - 1]["room_no"] + "室",
                 "algo_version": "fall-v1.2.0",
                 "config": {"roi": [], "furniture": [], "sensitivity": 0.7, "quietHours": []},
-                "status": DeviceStatus.OFFLINE if i > 85 else DeviceStatus.ONLINE,
-                "last_heartbeat": now - timedelta(seconds=3600 if i > 85 else i % 45),
+                "status": DeviceStatus.OFFLINE if i > DEMO_ONLINE_COUNT else DeviceStatus.ONLINE,
+                "last_heartbeat": now
+                - (timedelta(hours=3) if i > DEMO_ONLINE_COUNT else timedelta(seconds=i % 5)),
             }
-            for i in range(1, 91)
+            for i in range(1, DEMO_DEVICE_COUNT + 1)
         ],
     )
 
@@ -235,7 +244,7 @@ def build_history(now):
     events, alarms, notifications, actions = [], [], [], []
     for i, (status, kind, level) in enumerate(zip(statuses, types, levels), 1):
         pending = status == AlarmStatus.PENDING
-        n = rng.randint(1, 85 if pending else 90)
+        n = rng.randint(1, DEMO_ONLINE_COUNT if pending else DEMO_DEVICE_COUNT)
         elder, handler = f"E{n:03}", f"guardian{guardian_no(n):02}"
         manager = f"community{(n - 1) % 5 + 1:02}"
         notified_user = f"family{n:02}" if n <= 20 else handler
@@ -398,13 +407,49 @@ async def refresh_pending(session: AsyncSession) -> int:
     return len(values)
 
 
+async def refresh_demo(session: AsyncSession) -> tuple[int, int]:
+    """Refresh demo alarms and devices in the caller's transaction."""
+    alarms = await refresh_pending(session)
+    now = datetime.now(CHINA)
+    count = 0
+    for numbers, status, newest in (
+        (range(1, DEMO_ONLINE_COUNT + 1), DeviceStatus.ONLINE, now),
+        (
+            range(DEMO_ONLINE_COUNT + 1, DEMO_DEVICE_COUNT + 1),
+            DeviceStatus.OFFLINE,
+            now - timedelta(hours=3),
+        ),
+    ):
+        ids = [f"D{i:03}" for i in numbers]
+        changed = await session.scalars(
+            update(Device)
+            .where(
+                Device.id.in_(ids),
+                or_(
+                    Device.status != status,
+                    Device.last_heartbeat.is_(None),
+                    ~Device.last_heartbeat.between(newest - timedelta(seconds=5), newest),
+                ),
+            )
+            .values(status=status, last_heartbeat=newest)
+            .returning(Device.id)
+        )
+        count += len(changed.all())
+    return alarms, count
+
+
 async def main(refresh: bool = False):
     engine = get_engine()
     try:
         async with async_sessionmaker(engine).begin() as session:
-            count = await (refresh_pending(session) if refresh else seed(session))
+            if refresh:
+                alarms, devices = await refresh_demo(session)
+            else:
+                count = await seed(session)
         if refresh:
-            print(f"Refresh complete: {count} demo PENDING alarms updated.")
+            print(
+                f"Refresh complete: {alarms} demo PENDING alarms, {devices} demo devices updated."
+            )
         else:
             print(f"Seed complete: {count} new alarms.")
     finally:
@@ -413,5 +458,7 @@ async def main(refresh: bool = False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--refresh-pending", action="store_true", help="刷新演示待确认告警的时间")
-    asyncio.run(main(parser.parse_args().refresh_pending))
+    parser.add_argument(
+        "--refresh-demo", "--refresh-pending", action="store_true", help="刷新演示告警和设备心跳"
+    )
+    asyncio.run(main(parser.parse_args().refresh_demo))

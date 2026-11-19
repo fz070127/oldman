@@ -166,6 +166,7 @@ async def test_replay_dedup_ack_false_positive_and_timeline(m5):
     expected = datetime.fromisoformat(ack["ackAt"]) - datetime.fromisoformat(alarm["notifiedAt"])
     assert resolved["responseSec"] == int(expected.total_seconds())
     await request(m, "POST", path + "/ack", code=1005, json={})
+    await request(m, "POST", path + "/resolve", code=1005, json=resolution)
     detail = await request(m, "GET", path)
     actions = detail["actions"]
     assert [a["action"] for a in actions] == [
@@ -189,10 +190,17 @@ async def test_replay_dedup_ack_false_positive_and_timeline(m5):
     assert detail["event"]["handleRemark"] == "家属核实" and detail["event"]["handledAt"]
     timeline = detail["timeline"]
     assert [item["ts"] for item in timeline] == sorted(item["ts"] for item in timeline)
+    assert all(item["ts"].endswith("+08:00") for item in timeline)
     assert [t["text"] for t in timeline][:2] == ["检测到跌倒（置信度 93%）", "已推送家属（张女士）"]
     assert timeline[-2]["text"] == "家属张女士已确认" and timeline[-1]["text"].endswith("误报")
     assert (await mock_event(m, eventId="closed-in-window"))["alarm"] is None
     async with m.factory() as db:
+        assert (
+            await db.scalar(
+                select(func.count()).select_from(Event).where(Event.event_id == m.body["eventId"])
+            )
+            == 1
+        )
         assert (
             await db.scalar(
                 select(func.count()).select_from(Alarm).where(Alarm.elder_id == m.elder)

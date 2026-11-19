@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 import uvicorn
-from sqlalchemy import update
+from sqlalchemy import delete, update
 from test_events_alarms import m5 as m5  # noqa: PLC0414
 from test_events_alarms import mock_event, request
 from test_records import records_server as records_server  # noqa: PLC0414
@@ -174,6 +174,8 @@ async def test_heartbeat_and_expiry_publish_only_transitions(m5, ws_url):
         online = await read_message(ws)
         assert online["type"] == "DEVICE_STATUS"
         assert online["data"]["status"] == 1
+        assert online["ts"].endswith("+08:00")
+        assert online["data"]["lastHeartbeat"].endswith("+08:00")
         await handlers.on_heartbeat(m5.device, heartbeat.encode())
         await presence.scan()
         await ping(ws)
@@ -241,6 +243,7 @@ async def test_dashboard_sql_metrics_zero_days_and_scope(m5):
     assert overview["avgResponseSec"] == 47 and overview["falsePositiveRate"] == 1
     assert overview["alarmToday"] == overview["alarmP0Today"] == 1
     assert overview["elderOnline"] == overview["deviceOnline"] == 1
+    assert overview["updatedAt"].endswith("+08:00")
     trend = (await request(m5, "GET", "dashboard/trend?days=7"))["list"]
     assert len(trend) == 7
     for index, row in enumerate(trend):
@@ -259,8 +262,23 @@ async def test_dashboard_sql_metrics_zero_days_and_scope(m5):
     events = (await request(m5, "GET", "dashboard/realtime", "viewer01"))["list"]
     assert len(events) == 20 and events[0]["id"] == first_alarm.event_id
     assert all(event["communityId"] == "C001" for event in events)
+    assert all(event["occurredAt"].endswith("+08:00") for event in events)
     summary = await request(m5, "GET", "dashboard/device-status")
     assert summary["online"] == 1
     assert len(summary["offlineList"]) == summary["total"] - summary["online"]
     assert {item["id"] for item in summary["offlineList"]}.isdisjoint({"D001"})
     await request(m5, "GET", "dashboard/overview", "family01", code=1003)
+
+
+@pytest.mark.parametrize(("days", "code"), [(1, 0), (90, 0), (91, 1001)])
+async def test_trend_boundaries_on_empty_scope(m5, days, code):
+    async with m5.factory.begin() as db:
+        await db.execute(delete(Alarm))
+    data = await request(m5, "GET", f"dashboard/trend?days={days}", code=code)
+    if code == 0:
+        assert len(data["list"]) == days
+        assert all(
+            item["total"] == item["p0"] == item["p1"] == item["p2"] == 0 for item in data["list"]
+        )
+    else:
+        assert data is None

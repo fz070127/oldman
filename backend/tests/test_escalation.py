@@ -2,6 +2,7 @@ import asyncio
 import json
 import os
 from datetime import datetime
+from time import time
 from unittest.mock import AsyncMock
 
 import pytest
@@ -134,7 +135,8 @@ async def test_redis_restart_and_concurrent_workers(m5, monkeypatch):
             workers = [asyncio.create_task(engine.run()) for engine in engines]
             try:
                 await wait_for_alarm(m5, path, lambda a: a["escalateStep"] == 3)
-                await asyncio.gather(*(engine.process(alarm_id, 3) for engine in engines))
+                await redis.zadd(QUEUE_KEY, {f"{alarm_id}:3": time() - 1})
+                await asyncio.gather(*(engine.scan() for engine in engines))
                 result = await request(m5, "GET", path)
                 applied = [a for a in result["actions"] if a["action"] == "ESCALATE"]
                 start = datetime.fromisoformat(alarm["notifiedAt"])
@@ -143,6 +145,7 @@ async def test_redis_restart_and_concurrent_workers(m5, monkeypatch):
                     for a in applied
                 ]
                 assert len(applied) == 3
+                assert [a["detail"]["step"] for a in applied] == [1, 2, 3]
                 for elapsed, expected in zip(actual, (5, 10, 15), strict=True):
                     assert expected <= elapsed < expected + 2
             finally:

@@ -10,6 +10,15 @@ from app.core.response import R
 from app.models import Device, Elder, User
 from app.schemas.events import EventFilters, Handle, IngestPayload, MockEvent, StatsRange
 from app.schemas.records import RecordId
+from app.schemas.responses import (
+    EventDetail,
+    EventItem,
+    EventMedia,
+    EventStats,
+    MockEventResult,
+    Page,
+    Response,
+)
 from app.services import alarm_service, event_queries, event_service
 from app.services.records import commit_and_audit
 
@@ -20,27 +29,27 @@ EventWriter = Annotated[User, Depends(require_permission("event:write"))]
 EventId = Annotated[RecordId, Path(alias="id")]
 
 
-@router.get("", dependencies=[read_event])
+@router.get("", dependencies=[read_event], response_model=Response[Page[EventItem]])
 async def list_events(query: Annotated[EventFilters, Query()], scope: UserScope, db: DbSession):
     items, total = await event_queries.list_events(db, query, scope)
     return R.page(items, total, query.page, query.page_size)
 
 
-@router.get("/stats", dependencies=[read_event])
+@router.get("/stats", dependencies=[read_event], response_model=Response[EventStats])
 async def stats(db: DbSession, scope: UserScope, range: StatsRange = "7d"):
     return R.ok(await event_queries.event_stats(db, range, scope))
 
 
-@router.get("/{id}", dependencies=[read_event])
+@router.get("/{id}", dependencies=[read_event], response_model=Response[EventDetail])
 async def get_event(event_id: EventId, db: DbSession, scope: UserScope):
     row = await event_queries.find_event(db, event_id, scope)
     return R.ok(event_queries.event_fields(*row, full=True))
 
 
-@router.get("/{id}/media", dependencies=[read_event])
+@router.get("/{id}/media", dependencies=[read_event], response_model=Response[EventMedia])
 async def get_media(event_id: EventId, db: DbSession, scope: UserScope):
     event, _, _ = await event_queries.find_event(db, event_id, scope)
-    # TODO(M6): sign the stored media URLs and return their actual TTL.
+    # Media is served at the stored URLs. This endpoint issues no temporary URL.
     return R.ok(
         {
             "snapshotUrl": event.snapshot_url,
@@ -51,7 +60,7 @@ async def get_media(event_id: EventId, db: DbSession, scope: UserScope):
     )
 
 
-@router.put("/{id}/handle")
+@router.put("/{id}/handle", response_model=Response[EventDetail])
 async def handle_event(
     event_id: EventId,
     body: Handle,
@@ -68,7 +77,7 @@ async def handle_event(
     return R.ok(event_queries.event_fields(*row, full=True))
 
 
-@mock_router.post("/mock")
+@mock_router.post("/mock", response_model=Response[MockEventResult])
 async def mock_event(
     body: MockEvent,
     request: Request,

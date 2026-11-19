@@ -8,12 +8,19 @@ from sqlalchemy import and_, or_, select
 from app.models import Community, Elder, FamilyBinding, Guardian, User
 from app.models.enums import RoleCode
 from app.schemas.records import CHINA
+from app.schemas.responses import as_china
 
 log = structlog.get_logger()
 
 
 def envelope(kind: str, data: dict) -> dict:
-    return {"type": kind, "ts": datetime.now(CHINA).isoformat(), "data": jsonable_encoder(data)}
+    return {
+        "type": kind,
+        "ts": datetime.now(CHINA).isoformat(),
+        "data": jsonable_encoder(
+            data, custom_encoder={datetime: lambda value: as_china(value).isoformat()}
+        ),
+    }
 
 
 def alarm_update(alarm, handler: str | None) -> dict:

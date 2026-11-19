@@ -7,6 +7,12 @@ from app.core.exceptions import BizException
 from app.core.response import R
 from app.models import User
 from app.schemas.records import DeviceCreate, DeviceFilters, DeviceUpdate, RecordId
+from app.schemas.responses import (
+    DeviceDetail,
+    DeviceItem,
+    Page,
+    Response,
+)
 from app.services import device_service
 from app.services.records import commit_and_audit
 
@@ -16,7 +22,7 @@ DeviceWriter = Annotated[User, Depends(require_permission("device:write"))]
 DeviceId = Annotated[RecordId, Path(alias="id")]
 
 
-@router.get("", dependencies=[read_device])
+@router.get("", dependencies=[read_device], response_model=Response[Page[DeviceItem]])
 async def list_devices(
     query: Annotated[DeviceFilters, Query()], scope: UserScope, db: DbSession
 ) -> dict:
@@ -24,13 +30,13 @@ async def list_devices(
     return R.page(items, total, query.page, query.page_size)
 
 
-@router.get("/{id}", dependencies=[read_device])
+@router.get("/{id}", dependencies=[read_device], response_model=Response[DeviceDetail])
 async def get_device(device_id: DeviceId, scope: UserScope, db: DbSession) -> dict:
     device, elder = await device_service.find_device(db, device_id, scope)
     return R.ok(device_service.device_detail(device, elder))
 
 
-@router.post("", status_code=201)
+@router.post("", status_code=201, response_model=Response[DeviceDetail])
 async def create_device(
     body: DeviceCreate, actor: DeviceWriter, scope: UserScope, db: DbSession, audit: Audit
 ) -> dict:
@@ -41,7 +47,7 @@ async def create_device(
     return R.ok(device_service.device_detail(device, elder))
 
 
-@router.put("/{id}")
+@router.put("/{id}", response_model=Response[DeviceDetail])
 async def update_device(
     device_id: DeviceId,
     body: DeviceUpdate,
@@ -62,7 +68,11 @@ async def update_device(
     return R.ok(device_service.device_detail(device, elder))
 
 
-@router.post("/{id}/reboot", dependencies=[Depends(require_permission("device:write"))])
+@router.post(
+    "/{id}/reboot",
+    dependencies=[Depends(require_permission("device:write"))],
+    response_model=Response[None],
+)
 async def reboot_device(
     device_id: DeviceId, scope: UserScope, db: DbSession, request: Request
 ) -> dict:
