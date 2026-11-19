@@ -84,12 +84,12 @@ export default [
         bucket.set(dStr, { date: dStr, p0: 0, p1: 0, p2: 0, total: 0 })
       }
 
-      for (const ev of eventsStore) {
-        const dStr = dayjs(ev.occurredAt).format('YYYY-MM-DD')
+      for (const al of alarmsStore) {
+        const dStr = dayjs(al.createdAt).format('YYYY-MM-DD')
         const item = bucket.get(dStr)
         if (!item) continue
-        if (ev.level === EventLevel.P0) item.p0 += 1
-        else if (ev.level === EventLevel.P1) item.p1 += 1
+        if (al.level === EventLevel.P0) item.p0 += 1
+        else if (al.level === EventLevel.P1) item.p1 += 1
         else item.p2 += 1
         item.total += 1
       }

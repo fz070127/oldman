@@ -16,6 +16,8 @@ declare module 'vue-router' {
     hidden?: boolean
     /** 标签页是否固定（不可关闭） */
     affix?: boolean
+    /** 是否以 100vw×100vh 独立沉浸式全屏展示（隐藏侧边栏/顶栏/标签栏） */
+    fullscreen?: boolean
   }
 }
 
