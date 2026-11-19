@@ -21,6 +21,7 @@ import {
   alarmsStore,
   buildAlarmDetail,
   eventsStore,
+  refreshPendingAlarmTimestamps,
   toAlarmListItem,
 } from './_data'
 import {
@@ -58,6 +59,7 @@ export default [
     url: `${BASE}/alarms/pending-count`,
     method: 'get',
     response: () => {
+      refreshPendingAlarmTimestamps()
       const count = alarmsStore.filter((a) => a.status === AlarmStatus.PENDING).length
       return resultSuccess({ count })
     },
@@ -116,8 +118,19 @@ export default [
       const page = Number(sp.get('page') || 1)
       const pageSize = Number(sp.get('pageSize') || 20)
 
+      // 先结算到点的升级，避免 status 筛选与返回值不一致
+      refreshPendingAlarmTimestamps()
       let list = [...alarmsStore]
-      if (status) list = list.filter((a) => a.status === status)
+      // status 支持单个枚举或逗号分隔多状态（如 RESOLVED,FALSE_POSITIVE 用于“已完结”Tab）
+      if (status) {
+        const statusSet = new Set(
+          status
+            .split(',')
+            .map((s) => s.trim())
+            .filter(Boolean),
+        )
+        if (statusSet.size > 0) list = list.filter((a) => statusSet.has(a.status))
+      }
       if (level) list = list.filter((a) => a.level === level)
       if (elderId) list = list.filter((a) => a.elderId === elderId)
       if (startTime) {

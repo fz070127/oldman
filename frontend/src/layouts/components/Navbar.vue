@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <header class="navbar">
     <!-- Logo：宽度与侧边栏联动 -->
     <div class="navbar__logo" :class="{ 'is-collapsed': appStore.sidebarCollapsed }">
@@ -32,10 +32,39 @@
         <el-icon v-else class="navbar__action" :size="18" @click="openSearch"><Search /></el-icon>
       </div>
 
-      <!-- 通知铃铛 + 未读数 -->
-      <el-badge :value="appStore.unreadCount" :max="99" :hidden="appStore.unreadCount <= 0" class="navbar__badge">
-        <el-icon class="navbar__action" :size="18"><Bell /></el-icon>
-      </el-badge>
+      <!-- 实时通道状态 -->
+      <el-tooltip :content="wsStatusText" placement="bottom">
+        <span class="navbar__ws" :class="`is-${ws.status.value}`">
+          <i class="navbar__ws-dot" />
+          <span class="navbar__ws-text">{{ wsStatusLabel }}</span>
+        </span>
+      </el-tooltip>
+
+      <!-- 告警提示音开关（持久化 localStorage） -->
+      <el-tooltip :content="alarmStore.muted ? '提示音已关闭，点击开启' : '提示音已开启，点击静音'" placement="bottom">
+        <el-icon
+          class="navbar__action"
+          :class="{ 'is-muted': alarmStore.muted }"
+          :size="18"
+          @click="alarmStore.toggleMuted()"
+        >
+          <MuteNotification v-if="alarmStore.muted" />
+          <Headset v-else />
+        </el-icon>
+      </el-tooltip>
+
+      <!-- 通知铃铛 + 待处理告警数（WS 实时 +1，重连后用 pending-count 校准） -->
+      <el-tooltip content="待处理告警" placement="bottom">
+        <el-badge
+          :value="alarmStore.pendingCount"
+          :max="99"
+          :hidden="alarmStore.pendingCount <= 0"
+          class="navbar__badge"
+          :class="{ 'is-ringing': ringing }"
+        >
+          <el-icon class="navbar__action" :size="18" @click="goAlarm"><Bell /></el-icon>
+        </el-badge>
+      </el-tooltip>
 
       <!-- 用户下拉：昵称 + 角色中文名 -->
       <el-dropdown trigger="click" @command="onCommand">
@@ -98,14 +127,65 @@
 
 <script setup lang="ts">
 import type { FormInstance, FormRules } from 'element-plus'
-import { ArrowDown, Bell, Expand, Fold, Search } from '@element-plus/icons-vue'
+import {
+  ArrowDown,
+  Bell,
+  Expand,
+  Fold,
+  Headset,
+  MuteNotification,
+  Search,
+} from '@element-plus/icons-vue'
 import { updatePassword } from '@/api/auth'
+import { useWebSocket } from '@/hooks/useWebSocket'
+import { useAlarmStore } from '@/stores/alarm'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
 
 const appStore = useAppStore()
 const userStore = useUserStore()
+const alarmStore = useAlarmStore()
+const ws = useWebSocket()
 const route = useRoute()
+const router = useRouter()
+
+// ---------------- 实时通道状态 / 告警铃铛 ----------------
+const wsStatusLabel = computed(() => {
+  switch (ws.status.value) {
+    case 'open':
+      return '实时'
+    case 'connecting':
+      return '连接中'
+    case 'reconnecting':
+      return '重连中'
+    default:
+      return '离线'
+  }
+})
+const wsStatusText = computed(() => {
+  const mode = import.meta.env.VITE_USE_MOCK === 'true' ? 'Mock 通道（SSE 桥）' : 'WebSocket'
+  if (ws.status.value === 'reconnecting' && ws.nextRetryMs.value) {
+    return `${mode} 已断开，${Math.round(ws.nextRetryMs.value / 1000)}s 后重连`
+  }
+  return `${mode}：${wsStatusLabel.value}`
+})
+
+/** 新告警到达时铃铛摇 1.2s */
+const ringing = ref(false)
+let ringTimer: ReturnType<typeof setTimeout> | null = null
+watch(
+  () => alarmStore.pendingCount,
+  (n, old) => {
+    if (n <= (old ?? 0)) return
+    ringing.value = true
+    if (ringTimer) clearTimeout(ringTimer)
+    ringTimer = setTimeout(() => (ringing.value = false), 1200)
+  },
+)
+
+function goAlarm() {
+  if (router.hasRoute('Alarm')) router.push('/alarm')
+}
 
 /** 面包屑：取匹配链上有标题的路由 */
 const breadcrumbs = computed(() => route.matched.filter((r) => r.meta?.title))
@@ -275,6 +355,57 @@ async function onCommand(cmd: string) {
   &__badge {
     display: flex;
     align-items: center;
+
+    &.is-ringing :deep(.el-icon) {
+      color: $color-danger;
+      animation: bell-ring 0.6s ease-in-out 2;
+      transform-origin: 50% 0;
+    }
+  }
+
+  &__action.is-muted {
+    color: $text-disabled;
+  }
+
+  &__ws {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 2px 10px;
+    font-size: 12px;
+    color: $text-regular;
+    background: #f5f6f8;
+    border-radius: 10px;
+    cursor: default;
+
+    &.is-open {
+      color: #237804;
+      background: #f6ffed;
+
+      .navbar__ws-dot {
+        background: $color-success;
+        box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.6);
+        animation: ws-breath 2s infinite;
+      }
+    }
+
+    &.is-reconnecting,
+    &.is-connecting {
+      color: #d46b08;
+      background: #fff7e6;
+
+      .navbar__ws-dot {
+        background: $color-warning;
+      }
+    }
+  }
+
+  &__ws-dot {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background: #c0c4cc;
+    border-radius: 50%;
   }
 
   &__user {
@@ -295,6 +426,37 @@ async function onCommand(cmd: string) {
 
   &__role-tag {
     font-size: 12px;
+  }
+}
+
+@keyframes bell-ring {
+  0%,
+  100% {
+    transform: rotate(0);
+  }
+  20% {
+    transform: rotate(18deg);
+  }
+  40% {
+    transform: rotate(-16deg);
+  }
+  60% {
+    transform: rotate(10deg);
+  }
+  80% {
+    transform: rotate(-6deg);
+  }
+}
+
+@keyframes ws-breath {
+  0% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(82, 196, 26, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(82, 196, 26, 0);
   }
 }
 </style>

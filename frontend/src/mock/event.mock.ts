@@ -11,6 +11,7 @@ import {
   NotifyResultStatus,
   WsMessageType,
   type WsAlarmNewPayload,
+  type WsAlarmUpdatePayload,
 } from '@/types/alarm'
 import { ResultCode } from '@/types/common'
 import {
@@ -28,6 +29,8 @@ import {
   devicesStore,
   eldersStore,
   eventsStore,
+  escalateMockAlarm,
+  getEscalateAfterSec,
   syncElderAlarmStats,
   toAlarmListItem,
   type AlarmRecord,
@@ -131,7 +134,10 @@ export default [
     url: `${BASE}/events/mock`,
     method: 'post',
     response: ({ body }: MockReq<Partial<EventMockParams>>) => {
-      const elder = eldersStore.find((e) => e.id === body?.elderId) || eldersStore[0]
+      // 未指定 elderId 时随机挑一位有设备的老人，便于演示“多条告警排队”
+      const elder =
+        eldersStore.find((e) => e.id === body?.elderId) ||
+        eldersStore[Math.floor(Math.random() * Math.min(90, eldersStore.length))]
       const device = devicesStore.find((d) => d.elderId === elder.id) || devicesStore[0]
       const type = body?.type || EventType.FALL
       const level = body?.level || EventLevel.P0
@@ -205,6 +211,7 @@ export default [
           },
         ],
         remark: null,
+        autoEscalate: true,
       }
 
       // 插入数组头部，确保列表第一条即为新生成项
@@ -212,7 +219,9 @@ export default [
       alarmsStore.unshift(newAlarm)
       syncElderAlarmStats()
 
-      // 通过 mockWs 广播 ALARM_NEW
+      const escalateAfterSec = getEscalateAfterSec(level)
+
+      // 通过 mockWs 广播 ALARM_NEW（契约 3.12）
       mockWs.emit<WsAlarmNewPayload>({
         type: WsMessageType.ALARM_NEW,
         ts: createdAt,
@@ -227,9 +236,28 @@ export default [
           confidence,
           occurredAt,
           snapshotUrl: newEvent.snapshotUrl,
-          remainingSec: 60,
+          remainingSec: escalateAfterSec,
         },
       })
+
+      // 模拟 M6 升级引擎：到点未确认 → ESCALATED，并推送 ALARM_UPDATE
+      // （+1s 是因为 notifiedAt = 发生时间 + 1s）
+      setTimeout(
+        () => {
+          if (!escalateMockAlarm(newAlarm)) return
+          mockWs.emit<WsAlarmUpdatePayload>({
+            type: WsMessageType.ALARM_UPDATE,
+            ts: formatIsoOffset(new Date()),
+            data: {
+              alarmId: newAlarm.id,
+              status: newAlarm.status,
+              escalateStep: newAlarm.escalateStep,
+              currentHandler: newAlarm.currentHandler,
+            },
+          })
+        },
+        (escalateAfterSec + 1) * 1000,
+      )
 
       return resultSuccess({
         event: toEventListItem(newEvent),

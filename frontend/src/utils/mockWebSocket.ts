@@ -1,82 +1,52 @@
 /**
- * Mock WebSocket 客户端（浏览器侧）
- *
- * 与真实 WebSocket 保持同一套 subscribe / connect / close 接口，
- * F6 切真实 WS 时只需换实现，订阅代码不动。
+ * Mock 实时通道（浏览器侧）—— 只在 VITE_USE_MOCK=true 时被 wsTransport.ts 选中
  *
  * 为什么不是 EventTarget：
  * mock 的 emit 发生在 vite-plugin-mock 的 Node 进程里，浏览器拿不到那份内存总线。
- * 这里改成订阅 SSE 端点 GET /api/v1/mock/ws，由 Node 侧把每条消息推下来。
+ * 这里订阅 SSE 端点 GET /api/v1/mock/ws，由 Node 侧把每条消息推下来（见 src/mock/index.ts）。
  *
- * 契约 3.12 的断线重连（1s/2s/4s/8s，上限 30s）由 EventSource 自动重连兜底；
- * 重连后前端仍应主动拉一次 /alarms/pending-count 补数（F6 负责）。
+ * 与原生 WebSocket Transport 行为对齐：
+ * - SSE 出错时**主动关闭**，不用 EventSource 自带的重连，
+ *   把重连交还给 useWebSocket 的指数退避（1s/2s/4s/8s…≤30s），两种通道表现一致
+ * - SSE 是单向的，客户端发 PING 时本地回一条 PONG，让心跳看门狗逻辑保持统一
  */
 import type { WsMessage } from '@/types/alarm'
+import type { TransportFactory } from './wsTransport'
 
-export interface MockWebSocketLike {
-  /** 订阅消息，返回取消订阅函数（可重复调用） */
-  subscribe<T = unknown>(cb: (msg: WsMessage<T>) => void): () => void
-  /** 建立连接 */
-  connect(): void
-  /** 断开连接 */
-  close(): void
-  /** 当前是否已连上 */
-  readonly connected: boolean
-}
+const SSE_URL = `${(import.meta.env.VITE_API_BASE || '/api/v1').replace(/\/$/, '')}/mock/ws`
 
-const SSE_URL = '/api/v1/mock/ws'
+export const createMockTransport: TransportFactory = (_url, handlers) => {
+  let source: EventSource | null = new EventSource(SSE_URL)
+  let closed = false
 
-export function createMockWebSocket(): MockWebSocketLike {
-  const listeners = new Set<(msg: WsMessage<never>) => void>()
-  let source: EventSource | null = null
-  let connected = false
-
-  const dispatch = (msg: WsMessage) => {
-    for (const cb of listeners) {
-      try {
-        cb(msg as WsMessage<never>)
-      } catch (err) {
-        // 单个订阅者抛错不能影响其他订阅者
-        console.error('[mock-ws] subscriber error', err)
-      }
+  source.onopen = () => handlers.onOpen()
+  source.onmessage = (evt) => {
+    try {
+      handlers.onMessage(JSON.parse(evt.data) as WsMessage)
+    } catch (err) {
+      console.error('[mock-ws] bad message', evt.data, err)
     }
+  }
+  source.onerror = () => {
+    if (closed) return
+    closed = true
+    source?.close()
+    source = null
+    handlers.onClose('sse error')
   }
 
   return {
-    subscribe<T = unknown>(cb: (msg: WsMessage<T>) => void) {
-      listeners.add(cb as (msg: WsMessage<never>) => void)
-      return () => {
-        listeners.delete(cb as (msg: WsMessage<never>) => void)
-      }
+    send(msg) {
+      if (closed || msg.type !== 'PING') return
+      setTimeout(() => {
+        if (closed) return
+        handlers.onMessage({ type: 'PONG', ts: new Date().toISOString(), data: null })
+      }, 20)
     },
-
-    connect() {
-      if (source) return
-      source = new EventSource(SSE_URL)
-      source.onopen = () => {
-        connected = true
-      }
-      source.onmessage = (evt) => {
-        try {
-          dispatch(JSON.parse(evt.data) as WsMessage)
-        } catch (err) {
-          console.error('[mock-ws] bad message', evt.data, err)
-        }
-      }
-      source.onerror = () => {
-        connected = false
-        // EventSource 默认会自己按浏览器的节奏重连，这里不主动 close
-      }
-    },
-
     close() {
+      closed = true
       source?.close()
       source = null
-      connected = false
-    },
-
-    get connected() {
-      return connected
     },
   }
 }
