@@ -56,8 +56,15 @@ export const asyncRoutes: RouteRecordRaw[] = [
   {
     path: 'event',
     name: 'Event',
-    component: Placeholder,
+    alias: ['event/list'],
+    component: () => import('@/views/event/list.vue'),
     meta: { title: '事件中心', icon: markRaw(Warning), menuKey: 'event', permission: 'event:read' },
+  },
+  {
+    path: 'event/detail/:id',
+    name: 'EventDetail',
+    component: () => import('@/views/event/detail.vue'),
+    meta: { title: '事件详情', menuKey: 'event', permission: 'event:read', hidden: true },
   },
   {
     path: 'alarm',

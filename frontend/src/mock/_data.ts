@@ -455,6 +455,7 @@ function buildEvents(eldersList: ElderRecord[], devicesList: Device[]): EventRec
           : '已联系家属并上门确认安全'
         : null,
       handledAt,
+      handlerName: hs.handled ? elder.guardianName || '社区值班员' : null,
       features: buildEventFeatures(type),
       algoVersion: device.algoVersion,
     })

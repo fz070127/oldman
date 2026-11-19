@@ -47,6 +47,7 @@ const BASE = '/api/v1'
 interface MockReq<B = unknown> {
   url: string
   body: B
+  headers?: Record<string, string | string[] | undefined>
 }
 
 function toEventListItem(ev: EventRecord): EventItem {
@@ -68,6 +69,7 @@ function toEventListItem(ev: EventRecord): EventItem {
     handleResult: ev.handleResult,
     handleRemark: ev.handleRemark,
     handledAt: ev.handledAt,
+    handlerName: ev.handlerName,
   }
 }
 
@@ -93,6 +95,13 @@ export default [
 
       const handledList = scoped.filter((e) => e.handled)
       const fpCount = handledList.filter((e) => e.handleResult === EventHandleResult.FALSE_POSITIVE).length
+      const monthCutoff = now.subtract(30, 'day').startOf('day').valueOf()
+      const monthHandled = eventsStore.filter(
+        (e) => e.handled && dayjs(e.occurredAt).valueOf() >= monthCutoff,
+      )
+      const monthFp = monthHandled.filter((e) => e.handleResult === EventHandleResult.FALSE_POSITIVE).length
+      const effectiveHandled = handledList.length > 0 ? handledList : monthHandled
+      const effectiveFp = handledList.length > 0 ? fpCount : monthFp
 
       return resultSuccess({
         range,
@@ -101,7 +110,9 @@ export default [
         todayP0: todayEvents.filter((e) => e.level === EventLevel.P0).length,
         unhandledCount: scoped.filter((e) => !e.handled).length,
         falsePositiveCount: fpCount,
-        falsePositiveRate: handledList.length ? Number((fpCount / handledList.length).toFixed(2)) : 0,
+        falsePositiveRate: effectiveHandled.length
+          ? Number((effectiveFp / effectiveHandled.length).toFixed(2))
+          : 0,
         byLevel: {
           p0: scoped.filter((e) => e.level === EventLevel.P0).length,
           p1: scoped.filter((e) => e.level === EventLevel.P1).length,
@@ -280,7 +291,9 @@ export default [
       )
       return resultSuccess({
         snapshotUrl: `${ev.snapshotUrl}?sig=mock-sig`,
-        clipUrl: ev.clipUrl ? `${ev.clipUrl}?sig=mock-sig` : null,
+        clipUrl: ev.clipUrl
+          ? `${ev.clipUrl}?sig=mock-sig`
+          : 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
         keyframes,
         expiresInSec: 900,
       })
@@ -301,6 +314,7 @@ export default [
       ev.handleResult = body.result
       ev.handleRemark = body.remark || ''
       ev.handledAt = formatIsoOffset(new Date())
+      ev.handlerName = '系统管理员'
       return resultSuccess(toEventListItem(ev))
     },
   },
@@ -313,7 +327,22 @@ export default [
       const id = extractPathParam(url, /\/events\/([^/]+)$/)
       const ev = eventsStore.find((e) => e.id === id)
       if (!ev) return resultError(ResultCode.NOT_FOUND, '事件不存在')
-      return resultSuccess(ev)
+
+      const keyframes = Array.from(
+        { length: 6 },
+        (_, idx) => `https://picsum.photos/seed/${ev.id}-kf-${idx + 1}/320/240`,
+      )
+      return resultSuccess({
+        ...ev,
+        media: {
+          snapshotUrl: `${ev.snapshotUrl}?sig=mock-sig`,
+          clipUrl: ev.clipUrl
+            ? `${ev.clipUrl}?sig=mock-sig`
+            : 'https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4',
+          keyframes,
+          expiresInSec: 900,
+        },
+      })
     },
   },
 ] as MockMethod[]

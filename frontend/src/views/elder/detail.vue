@@ -328,7 +328,7 @@ async function handleDisable() {
 }
 
 function goEventDetail(eventId: string) {
-  router.push({ path: '/event', query: { eventId } })
+  router.push(`/event/detail/${eventId}`)
 }
 
 // ---------------- 家属绑定 / 解绑 ----------------
