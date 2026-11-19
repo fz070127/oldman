@@ -1,0 +1,738 @@
+{
+  "date": "2026-11-19",
+  "machine": {
+    "cpu": "Intel Core i7-14650HX",
+    "cores": 16,
+    "logical_cpus": 24,
+    "ram_gib": 15.71,
+    "os": "Windows 11 build 26200",
+    "python": "3.12.5",
+    "torch": "2.15.0",
+    "ultralytics": "8.4.215",
+    "opencv": "5.1.0.95",
+    "paho_mqtt": "2.1.0",
+    "broker": "aMQTT 0.11.3, loopback"
+  },
+  "motion_window_sec": 2,
+  "clip_tail_hold_sec": 4,
+  "video_full": [
+    {
+      "seq": "fall-01",
+      "onset": 90,
+      "fps": 18.11,
+      "process_cpu": 16.81,
+      "system_cpu": 28.37,
+      "system_cpu_max": 42.2,
+      "peak_rss_mib": 437.42,
+      "evidence": 111,
+      "emit": 175,
+      "reason": "stream",
+      "payload": {
+        "eventId": "f2e4d2cd-00ec-4d15-9287-bbc23e9d0ddd",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P1",
+        "confidence": 0.754,
+        "occurredAt": "2026-11-19T13:25:03.628540+08:00",
+        "features": {
+          "torsoAngle": 24.24755811788523,
+          "heightDrop": 0.4556559542537623,
+          "stillDurationSec": 0.0,
+          "trackId": 0,
+          "aspectRatio": 1.4525173446825796,
+          "kpConf": 0.672436427544145
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 5.6026,
+      "subscriber_sec": 5.6038
+    },
+    {
+      "seq": "fall-05",
+      "onset": 86,
+      "fps": 14.91,
+      "process_cpu": 16.49,
+      "system_cpu": 26.56,
+      "system_cpu_max": 39.9,
+      "peak_rss_mib": 435.67,
+      "evidence": 105,
+      "emit": 165,
+      "reason": "stream",
+      "payload": {
+        "eventId": "98fd0368-edf0-4a2e-b34e-c1228c6d4236",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P0",
+        "confidence": 0.7683,
+        "occurredAt": "2026-11-19T13:25:25.882632+08:00",
+        "features": {
+          "torsoAngle": 34.96602992811565,
+          "heightDrop": 0.488762217479426,
+          "stillDurationSec": 2.0,
+          "trackId": 0,
+          "aspectRatio": 2.1205546045520602,
+          "kpConf": 0.35111289393321116
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 8.2047,
+      "subscriber_sec": 8.2062
+    },
+    {
+      "seq": "fall-09",
+      "onset": 127,
+      "fps": 14.75,
+      "process_cpu": 16.41,
+      "system_cpu": 27.01,
+      "system_cpu_max": 43.7,
+      "peak_rss_mib": 437.93,
+      "evidence": 143,
+      "emit": 203,
+      "reason": "stream",
+      "payload": {
+        "eventId": "ef3d1e57-91c3-477e-99df-84c1786adaa2",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P1",
+        "confidence": 0.8273,
+        "occurredAt": "2026-11-19T13:25:51.173765+08:00",
+        "features": {
+          "torsoAngle": 16.604904439845804,
+          "heightDrop": 0.5353654404356718,
+          "stillDurationSec": 0.0,
+          "trackId": 0,
+          "aspectRatio": 1.2375098597835,
+          "kpConf": 0.7285122235908228
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 9.5238,
+      "subscriber_sec": 9.525
+    },
+    {
+      "seq": "fall-06",
+      "onset": 25,
+      "fps": 13.9,
+      "process_cpu": 15.85,
+      "system_cpu": 37.66,
+      "system_cpu_max": 86.3,
+      "peak_rss_mib": 437.32,
+      "evidence": 41,
+      "emit": 101,
+      "reason": "stream",
+      "payload": {
+        "eventId": "d2c2c962-8fce-46a2-99ef-539e3a92fd40",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P0",
+        "confidence": 0.867,
+        "occurredAt": "2026-11-19T13:26:13.221126+08:00",
+        "features": {
+          "torsoAngle": 3.178845739300153,
+          "heightDrop": 0.4911857189145684,
+          "stillDurationSec": 2.0,
+          "trackId": 0,
+          "aspectRatio": 1.6226487760541033,
+          "kpConf": 0.7908522263169289
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 6.4988,
+      "subscriber_sec": 6.5004
+    },
+    {
+      "seq": "fall-10",
+      "onset": 41,
+      "fps": 14.88,
+      "process_cpu": 16.49,
+      "system_cpu": 26.13,
+      "system_cpu_max": 34.7,
+      "peak_rss_mib": 437.77,
+      "evidence": 69,
+      "emit": 129,
+      "reason": "stream",
+      "payload": {
+        "eventId": "cef8a63c-0ce7-4c63-907f-afcaa7b498e7",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P0",
+        "confidence": 0.5775,
+        "occurredAt": "2026-11-19T13:26:35.335889+08:00",
+        "features": {
+          "torsoAngle": null,
+          "heightDrop": 0.4595187063706624,
+          "stillDurationSec": 2.0,
+          "trackId": 0,
+          "aspectRatio": 2.7069293071152445,
+          "kpConf": 0.3963705444954993
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 7.3938,
+      "subscriber_sec": 7.395
+    },
+    {
+      "seq": "fall-02",
+      "onset": 40,
+      "fps": 15.25,
+      "process_cpu": 16.44,
+      "system_cpu": 32.76,
+      "system_cpu_max": 44.1,
+      "peak_rss_mib": 437.89,
+      "evidence": 65,
+      "emit": 125,
+      "reason": "stream",
+      "payload": {
+        "eventId": "c0ee89e1-100e-4fd5-b33c-95b661d83af2",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P0",
+        "confidence": 0.827,
+        "occurredAt": "2026-11-19T13:29:09.791852+08:00",
+        "features": {
+          "torsoAngle": null,
+          "heightDrop": 0.45219202571595307,
+          "stillDurationSec": 2.0,
+          "trackId": 0,
+          "aspectRatio": 2.6900395158930457,
+          "kpConf": 0.3649870726992102
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 7.2632,
+      "subscriber_sec": 7.2645
+    }
+  ],
+  "video_downsample2": [
+    {
+      "seq": "fall-01",
+      "onset": 90,
+      "fps": 15.05,
+      "process_cpu": 14.99,
+      "system_cpu": 23.75,
+      "system_cpu_max": 42.5,
+      "peak_rss_mib": 437.51,
+      "evidence": 111,
+      "emit": 177,
+      "reason": "stream",
+      "payload": {
+        "eventId": "071ba6cd-7df7-408c-b1c5-e36d5dffff89",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P1",
+        "confidence": 0.754,
+        "occurredAt": "2026-11-19T13:29:32.575669+08:00",
+        "features": {
+          "torsoAngle": 24.24755811788523,
+          "heightDrop": 0.4542653169079687,
+          "stillDurationSec": 0.0,
+          "trackId": 0,
+          "aspectRatio": 1.4525173446825796,
+          "kpConf": 0.672436427544145
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 2.9349,
+      "subscriber_sec": 2.9359
+    },
+    {
+      "seq": "fall-05",
+      "onset": 86,
+      "fps": 15.06,
+      "process_cpu": 15.11,
+      "system_cpu": 25.19,
+      "system_cpu_max": 42.6,
+      "peak_rss_mib": 439.57,
+      "evidence": 105,
+      "emit": 165,
+      "reason": "stream",
+      "payload": {
+        "eventId": "67655650-4a16-45a0-8614-e6b60f321503",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P0",
+        "confidence": 0.7683,
+        "occurredAt": "2026-11-19T13:29:46.477771+08:00",
+        "features": {
+          "torsoAngle": 34.96602992811565,
+          "heightDrop": 0.48780153880341864,
+          "stillDurationSec": 2.0,
+          "trackId": 0,
+          "aspectRatio": 2.1205546045520602,
+          "kpConf": 0.35111289393321116
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 2.6862,
+      "subscriber_sec": 2.6871
+    },
+    {
+      "seq": "fall-09",
+      "onset": 127,
+      "fps": 15.05,
+      "process_cpu": 15.13,
+      "system_cpu": 23.29,
+      "system_cpu_max": 34.8,
+      "peak_rss_mib": 439.18,
+      "evidence": 143,
+      "emit": 203,
+      "reason": "stream",
+      "payload": {
+        "eventId": "6ba14218-2c8a-42f3-83af-ef474ac020e9",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P1",
+        "confidence": 0.8273,
+        "occurredAt": "2026-11-19T13:30:01.729592+08:00",
+        "features": {
+          "torsoAngle": 16.604904439845804,
+          "heightDrop": 0.5353654404356718,
+          "stillDurationSec": 0.0,
+          "trackId": 0,
+          "aspectRatio": 1.2375098597835,
+          "kpConf": 0.7285122235908228
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 2.5749,
+      "subscriber_sec": 2.5761
+    },
+    {
+      "seq": "fall-06",
+      "onset": 25,
+      "fps": 15.08,
+      "process_cpu": 14.91,
+      "system_cpu": 22.93,
+      "system_cpu_max": 32.7,
+      "peak_rss_mib": 436.8,
+      "evidence": 41,
+      "emit": 101,
+      "reason": "stream",
+      "payload": {
+        "eventId": "c11569f5-fce8-44cc-988d-5ecacb433887",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P0",
+        "confidence": 0.867,
+        "occurredAt": "2026-11-19T13:30:12.815414+08:00",
+        "features": {
+          "torsoAngle": 3.178845739300153,
+          "heightDrop": 0.4911857189145684,
+          "stillDurationSec": 2.0,
+          "trackId": 0,
+          "aspectRatio": 1.6226487760541033,
+          "kpConf": 0.7908522263169289
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 2.59,
+      "subscriber_sec": 2.5913
+    },
+    {
+      "seq": "fall-10",
+      "onset": 41,
+      "fps": 15.02,
+      "process_cpu": 14.9,
+      "system_cpu": 30.88,
+      "system_cpu_max": 84.8,
+      "peak_rss_mib": 435.51
+    },
+    {
+      "seq": "fall-02",
+      "onset": 40,
+      "fps": 15.04,
+      "process_cpu": 15.19,
+      "system_cpu": 25.8,
+      "system_cpu_max": 32.4,
+      "peak_rss_mib": 438.36,
+      "evidence": 65,
+      "emit": 125,
+      "reason": "stream",
+      "payload": {
+        "eventId": "eedf7240-477e-43e2-9db1-bc0a9c804578",
+        "deviceNo": "A5-BENCH",
+        "elderId": "E001",
+        "type": "FALL",
+        "level": "P0",
+        "confidence": 0.827,
+        "occurredAt": "2026-11-19T13:30:38.331716+08:00",
+        "features": {
+          "torsoAngle": null,
+          "heightDrop": 0.45219202571595307,
+          "stillDurationSec": 2.0,
+          "trackId": 0,
+          "aspectRatio": 2.6900395158930457,
+          "kpConf": 0.3649870726992102
+        },
+        "algoVersion": "fall-v1.0.0",
+        "snapshotUrl": null,
+        "clipUrl": null
+      },
+      "publish_sec": 2.8794,
+      "subscriber_sec": 2.8804
+    }
+  ],
+  "splits": [
+    {
+      "split": "val",
+      "window": 3,
+      "stride": 1,
+      "hold_sec": 0,
+      "hits": [
+        "fall-19",
+        "fall-03",
+        "fall-18",
+        "fall-29",
+        "fall-05",
+        "fall-25"
+      ],
+      "false": [
+        "adl-36",
+        "adl-37"
+      ],
+      "p0": []
+    },
+    {
+      "split": "val",
+      "window": 2,
+      "stride": 1,
+      "hold_sec": 0,
+      "hits": [
+        "fall-19",
+        "fall-03",
+        "fall-18",
+        "fall-29",
+        "fall-05",
+        "fall-25"
+      ],
+      "false": [
+        "adl-36",
+        "adl-37"
+      ],
+      "p0": []
+    },
+    {
+      "split": "val",
+      "window": 3,
+      "stride": 2,
+      "hold_sec": 0,
+      "hits": [
+        "fall-03",
+        "fall-18",
+        "fall-29",
+        "fall-05"
+      ],
+      "false": [
+        "adl-36",
+        "adl-37"
+      ],
+      "p0": []
+    },
+    {
+      "split": "val",
+      "window": 2,
+      "stride": 2,
+      "hold_sec": 0,
+      "hits": [
+        "fall-03",
+        "fall-18",
+        "fall-29",
+        "fall-05"
+      ],
+      "false": [
+        "adl-36",
+        "adl-37"
+      ],
+      "p0": []
+    },
+    {
+      "split": "test",
+      "window": 3,
+      "stride": 1,
+      "hold_sec": 0,
+      "hits": [
+        "fall-09",
+        "fall-01"
+      ],
+      "false": [
+        "adl-10",
+        "adl-11"
+      ],
+      "p0": []
+    },
+    {
+      "split": "test",
+      "window": 2,
+      "stride": 1,
+      "hold_sec": 0,
+      "hits": [
+        "fall-09",
+        "fall-01"
+      ],
+      "false": [
+        "adl-10",
+        "adl-11"
+      ],
+      "p0": [
+        "adl-10",
+        "adl-11"
+      ]
+    },
+    {
+      "split": "test",
+      "window": 3,
+      "stride": 2,
+      "hold_sec": 0,
+      "hits": [
+        "fall-09",
+        "fall-01"
+      ],
+      "false": [
+        "adl-10",
+        "adl-11"
+      ],
+      "p0": []
+    },
+    {
+      "split": "test",
+      "window": 2,
+      "stride": 2,
+      "hold_sec": 0,
+      "hits": [
+        "fall-09",
+        "fall-01"
+      ],
+      "false": [
+        "adl-10",
+        "adl-11"
+      ],
+      "p0": [
+        "adl-10",
+        "adl-11"
+      ]
+    },
+    {
+      "split": "val",
+      "window": 3,
+      "stride": 1,
+      "hold_sec": 4,
+      "hits": [
+        "fall-19",
+        "fall-03",
+        "fall-18",
+        "fall-29",
+        "fall-05",
+        "fall-25"
+      ],
+      "false": [
+        "adl-36",
+        "adl-37"
+      ],
+      "p0": [
+        "fall-29",
+        "fall-05"
+      ]
+    },
+    {
+      "split": "val",
+      "window": 2,
+      "stride": 1,
+      "hold_sec": 4,
+      "hits": [
+        "fall-19",
+        "fall-03",
+        "fall-18",
+        "fall-29",
+        "fall-05",
+        "fall-25"
+      ],
+      "false": [
+        "adl-36",
+        "adl-37"
+      ],
+      "p0": [
+        "fall-29",
+        "fall-05"
+      ]
+    },
+    {
+      "split": "val",
+      "window": 3,
+      "stride": 2,
+      "hold_sec": 4,
+      "hits": [
+        "fall-03",
+        "fall-18",
+        "fall-29",
+        "fall-05"
+      ],
+      "false": [
+        "adl-36",
+        "adl-37"
+      ],
+      "p0": [
+        "fall-29",
+        "fall-05"
+      ]
+    },
+    {
+      "split": "val",
+      "window": 2,
+      "stride": 2,
+      "hold_sec": 4,
+      "hits": [
+        "fall-03",
+        "fall-18",
+        "fall-29",
+        "fall-05"
+      ],
+      "false": [
+        "adl-36",
+        "adl-37"
+      ],
+      "p0": [
+        "fall-29",
+        "fall-05"
+      ]
+    },
+    {
+      "split": "test",
+      "window": 3,
+      "stride": 1,
+      "hold_sec": 4,
+      "hits": [
+        "fall-09",
+        "fall-01"
+      ],
+      "false": [
+        "adl-10",
+        "adl-11"
+      ],
+      "p0": [
+        "adl-10",
+        "adl-11"
+      ]
+    },
+    {
+      "split": "test",
+      "window": 2,
+      "stride": 1,
+      "hold_sec": 4,
+      "hits": [
+        "fall-09",
+        "fall-01"
+      ],
+      "false": [
+        "adl-10",
+        "adl-11"
+      ],
+      "p0": [
+        "adl-10",
+        "adl-11"
+      ]
+    },
+    {
+      "split": "test",
+      "window": 3,
+      "stride": 2,
+      "hold_sec": 4,
+      "hits": [
+        "fall-09",
+        "fall-01"
+      ],
+      "false": [
+        "adl-10",
+        "adl-11"
+      ],
+      "p0": [
+        "adl-10",
+        "adl-11"
+      ]
+    },
+    {
+      "split": "test",
+      "window": 2,
+      "stride": 2,
+      "hold_sec": 4,
+      "hits": [
+        "fall-09",
+        "fall-01"
+      ],
+      "false": [
+        "adl-10",
+        "adl-11"
+      ],
+      "p0": [
+        "adl-10",
+        "adl-11"
+      ]
+    }
+  ],
+  "outage": {
+    "devices": 5,
+    "pending_per_device": [
+      4,
+      4,
+      4,
+      4,
+      4
+    ],
+    "received_in_device_fifo_order": 20,
+    "matched_id_and_payload": 20,
+    "example_pending_id": "965e4a62-a355-4e9c-9de1-31ca7fe24296",
+    "real_mp4_offline_sent": 0,
+    "real_mp4_reconnected_sent": 1,
+    "real_mp4_payload": {
+      "eventId": "73e4bf62-87ae-48d6-b659-1def421e212c",
+      "deviceNo": "EDGE-0001",
+      "elderId": "E001",
+      "type": "FALL",
+      "level": "P1",
+      "confidence": 0.758,
+      "occurredAt": "2026-11-19T13:23:58.075318+08:00",
+      "features": {
+        "torsoAngle": 20.632584255501015,
+        "heightDrop": 0.4573206829693065,
+        "stillDurationSec": 0.0,
+        "trackId": 0,
+        "aspectRatio": 1.4552636237003518,
+        "kpConf": 0.6609132509021198
+      },
+      "algoVersion": "fall-v1.0.0",
+      "snapshotUrl": null,
+      "clipUrl": null
+    },
+    "oldest_evicted_after_inserts": 1001,
+    "retained_rows": 1000
+  }
+}

@@ -116,6 +116,7 @@ class Track:
     state: State = State.STANDING
     fall: SuspectedFall | None = None
     p1_emitted: bool = False
+    track_id: int = 0
 
 
 class FallDetector:
@@ -173,7 +174,7 @@ class FallDetector:
         for track_id, (box, slot) in zip(matches, observations):
             if track_id is None:
                 track_id = self.next_id
-                self.tracks[track_id] = Track()
+                self.tracks[track_id] = Track(track_id=track_id)
                 self.next_id += 1
             track = self.tracks[track_id]
             while track.samples and frame - track.samples[0].frame > self.history_frames:
@@ -263,15 +264,16 @@ class FallDetector:
             motion = features.motion if elapsed_frames == self.motion_frames else center_motion(boxes)
             if coverage >= cfg.motion_coverage_min and motion is not None and motion < cfg.motion_max:
                 track.state = State.CONFIRMED
-                self._emit(fall, sample, "P0")
+                self._emit(track, sample, "P0")
 
     def _emit_p1(self, track):
         if track.fall is not None and not track.p1_emitted:
             track.p1_emitted = True
             if track.fall.roi_action != "suppress":
-                self._emit(track.fall, track.fall.sample, "P1")
+                self._emit(track, track.fall.sample, "P1")
 
-    def _emit(self, fall, sample, level):
+    def _emit(self, track, sample, level):
+        fall = track.fall
         features = sample.features
         evidence = fall.sample.features
         confidence = evidence.bbox_conf
@@ -284,7 +286,8 @@ class FallDetector:
             "aspect_ratio": features.aspect_ratio,
             "kp_conf": features.kp_conf,
         }
-        self.detections.append({"frame": sample.frame, "ts_sec": round(sample.frame / self.fps, 3),
+        self.detections.append({"track_id": track.track_id, "evidence_frame": fall.sample.frame,
+                                "frame": sample.frame, "ts_sec": round(sample.frame / self.fps, 3),
                                 "level": level, "confidence": round(confidence, 4), "signals": signals})
 
     def finish(self):
