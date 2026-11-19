@@ -1,0 +1,80 @@
+{
+  "pages": [
+    {
+      "path": "pages/login/index",
+      "style": {
+        "navigationBarTitleText": "家属登录",
+        "navigationBarBackgroundColor": "#EBF3FF",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationBarTitleText": "银铃守护 · 家属端",
+        "navigationBarBackgroundColor": "#2B7FFF",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/alarm/index",
+      "style": {
+        "navigationBarTitleText": "紧急告警处置",
+        "navigationBarBackgroundColor": "#FF4D4F",
+        "navigationBarTextStyle": "white"
+      }
+    },
+    {
+      "path": "pages/records/index",
+      "style": {
+        "navigationBarTitleText": "告警记录",
+        "navigationBarBackgroundColor": "#FFFFFF",
+        "navigationBarTextStyle": "black"
+      }
+    },
+    {
+      "path": "pages/profile/index",
+      "style": {
+        "navigationBarTitleText": "我的",
+        "navigationBarBackgroundColor": "#2B7FFF",
+        "navigationBarTextStyle": "white"
+      }
+    }
+  ],
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "银铃守护 · 家属端",
+    "navigationBarBackgroundColor": "#FFFFFF",
+    "backgroundColor": "#F5F7FA"
+  },
+  "tabBar": {
+    "color": "#667085",
+    "selectedColor": "#2B7FFF",
+    "borderStyle": "black",
+    "backgroundColor": "#FFFFFF",
+    "height": "60px",
+    "fontSize": "14px",
+    "iconWidth": "24px",
+    "spacing": "4px",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "iconPath": "static/tab-home.png",
+        "selectedIconPath": "static/tab-home-active.png",
+        "text": "首页"
+      },
+      {
+        "pagePath": "pages/records/index",
+        "iconPath": "static/tab-records.png",
+        "selectedIconPath": "static/tab-records-active.png",
+        "text": "记录"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "iconPath": "static/tab-profile.png",
+        "selectedIconPath": "static/tab-profile-active.png",
+        "text": "我的"
+      }
+    ]
+  }
+}
