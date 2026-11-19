@@ -84,6 +84,14 @@ async def test_offline_queue_escalates_and_skips_ack(m5, unused_tcp_port, capsys
             for action in alarm["actions"]
             if action["channel"] == "WS"
         )
+        # 被确认的告警仍有一条到点任务在内存队列里。等它真正被扫描到并跳过，
+        # 而不是靠 first 升完三级的时间点碰运气（两者只相差几十毫秒）。
+        await wait_for_alarm(
+            m5,
+            ack_path,
+            lambda a: any(x["action"] == "ACK" for x in a["actions"]) and a["escalateStep"] == 0,
+        )
+        await asyncio.sleep(engine.interval * 3)
     logs = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
     assert any(
         entry["event"] == "alarm_escalation_redis_degraded"
