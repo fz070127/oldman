@@ -9,7 +9,7 @@ description = "银铃守护后端服务"
 requires-python = ">=3.11,<3.13"
 dependencies = [
     "fastapi>=0.115,<1",
-    "uvicorn[standard]",
+    "uvicorn[standard]>=0.36",
     "sqlalchemy[asyncio]>=2.0,<2.1",
     "asyncpg",
     "alembic",

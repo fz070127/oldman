@@ -1,4 +1,5 @@
 import asyncio
+import sys
 from contextlib import AsyncExitStack, asynccontextmanager
 from typing import Literal
 
@@ -12,7 +13,7 @@ from redis.asyncio import Redis
 from redis.exceptions import RedisError
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 
 from app.api.v1.events import mock_router
 from app.api.v1.router import router
@@ -20,6 +21,9 @@ from app.core.config import Settings
 from app.core.exceptions import register_handlers
 from app.core.logging import TraceMiddleware, configure_logging
 from app.core.response import R
+from app.mqtt.client import MqttClient
+from app.mqtt.handlers import MqttHandlers
+from app.mqtt.publisher import MqttPublisher
 
 DependencyStatus = Literal["up", "down"]
 
@@ -28,6 +32,7 @@ class HealthData(BaseModel):
     status: Literal["up"]
     db: DependencyStatus
     redis: DependencyStatus
+    mqtt: DependencyStatus
 
 
 class HealthResponse(BaseModel):
@@ -69,7 +74,27 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             resources.push_async_callback(redis.aclose)
             application.state.db = engine
             application.state.redis = redis
-            yield
+            sessions = async_sessionmaker(engine, expire_on_commit=False)
+            application.state.db_sessionmaker = sessions
+            mqtt = MqttClient(settings)
+            application.state.mqtt = mqtt
+            publisher = application.state.mqtt_publisher = MqttPublisher(mqtt, sessions)
+            handlers = MqttHandlers(sessions, redis, publisher)
+            task = asyncio.create_task(
+                mqtt.run(
+                    {
+                        "heartbeat": handlers.on_heartbeat,
+                        "event": handlers.on_event,
+                        "cmd/reply": handlers.on_cmd_reply,
+                    }
+                ),
+                name="mqtt-subscriber",
+            )
+            try:
+                yield
+            finally:
+                task.cancel()
+                await asyncio.gather(task, return_exceptions=True)
 
     application = FastAPI(title="银铃守护 API", version="1.0.0", lifespan=lifespan)
     application.state.settings = settings
@@ -92,7 +117,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         db, redis = await asyncio.gather(
             check_database(request.app.state.db), check_redis(request.app.state.redis)
         )
-        return R.ok({"status": "up", "db": db, "redis": redis})
+        mqtt = "up" if request.app.state.mqtt.connected else "down"
+        return R.ok({"status": "up", "db": db, "redis": redis, "mqtt": mqtt})
 
     return application
 
@@ -100,4 +126,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 app = create_app()
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=Settings().app_port)
+    loop = "asyncio:SelectorEventLoop" if sys.platform == "win32" else "auto"
+    uvicorn.run(app, host="0.0.0.0", port=Settings().app_port, loop=loop)

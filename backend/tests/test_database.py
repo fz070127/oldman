@@ -89,6 +89,7 @@ async def test_migration_round_trip(migrated):
         "alarm_action",
         "notification",
         "audit_log",
+        "mqtt_cmd_log",
     }
     assert await migrated.run_sync(tables) == expected | {"alembic_version"}
     indexes = dict(
@@ -185,6 +186,7 @@ async def test_seed_distribution_and_idempotence(migrated):
         "notification": 500,
         "alarm_action": 1300,
         "audit_log": 0,
+        "mqtt_cmd_log": 0,
     }
     async with factory.begin() as session:
         assert await seed(session) == 0

@@ -107,12 +107,14 @@ async def sessions():
 
 
 @pytest.fixture
-async def auth_app(sessions, request):
+async def auth_app(sessions, request, unused_tcp_port):
     mode = getattr(request, "param", "down")
     redis_url = os.getenv("TEST_REDIS_URL") if mode == "up" else "redis://127.0.0.1:1/0"
     if not redis_url:
         pytest.skip("Set TEST_REDIS_URL to run the online Redis authentication test")
-    settings = Settings(_env_file=None, jwt_secret=SECRET, redis_url=redis_url)
+    settings = Settings(
+        _env_file=None, jwt_secret=SECRET, redis_url=redis_url, mqtt_port=unused_tcp_port
+    )
     app = create_app(settings)
     factory, schema = sessions
 
@@ -162,6 +164,7 @@ async def test_role_menus_permissions_and_scopes(auth_app, capsys):
         "status": "up",
         "db": "up",
         "redis": "down",
+        "mqtt": "down",
     }
     for role, (permissions, menus) in ROLES.items():
         username = f"{schema}-{role}"

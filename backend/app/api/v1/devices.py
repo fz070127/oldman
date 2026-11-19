@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Query
+from fastapi import APIRouter, Depends, Path, Query, Request
 
 from app.core.deps import Audit, DbSession, UserScope, require_permission
 from app.core.exceptions import BizException
@@ -63,6 +63,12 @@ async def update_device(
 
 
 @router.post("/{id}/reboot", dependencies=[Depends(require_permission("device:write"))])
-async def reboot_device(device_id: DeviceId, scope: UserScope, db: DbSession) -> dict:
-    await device_service.find_device(db, device_id, scope)
-    raise BizException(5001, "设备当前离线，无法远程重启")
+async def reboot_device(
+    device_id: DeviceId, scope: UserScope, db: DbSession, request: Request
+) -> dict:
+    device, _ = await device_service.find_device(db, device_id, scope)
+    device_no = device.device_no
+    await db.rollback()
+    if not await request.app.state.mqtt_publisher.publish_cmd(device_no, "restart", {}):
+        raise BizException(5001, "设备重启指令下发失败或未获确认")
+    return R.ok()
