@@ -43,7 +43,7 @@ def read_reviews(path, rows):
                 frame = int(record["frame"])
                 if not 1 <= frame <= int(rows[seq]["frame_count"]) or not record["basis"].strip():
                     raise ValueError(f"{seq}: 复核帧或观察记录无效")
-                if record["review"] not in ("未人工逐帧复核", "负责人抽检"):
+                if record["review"] not in ("未人工逐帧复核", "人工逐帧复核"):
                     raise ValueError(f"{seq}: 复核状态无效")
                 if record["approved"] not in ("0", "1"):
                     raise ValueError(f"{seq}: 登记授权须为 0 或 1")
@@ -57,18 +57,18 @@ def read_reviews(path, rows):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--reviews", type=Path, default=REVIEWS)
-    parser.add_argument("--apply", action="store_true", help="将负责人批准登记的视觉判读值写入总清单")
+    parser.add_argument("--apply", action="store_true", help="将人工复核登记的视觉判读值写入总清单")
     args = parser.parse_args()
     rows = read_manifest()
     reviews = read_reviews(args.reviews, rows)
     lines = ["# 跌倒起始帧标注", "",
              "fall_onset 定义为人体开始失去平衡的第一帧，以 1 起算。"
-             "A4 计算时延时使用负责人批准登记的视觉判读帧，并保留实际复核来源与边界不确定度。",
+             "A4 计算时延时使用人工复核登记的视觉判读帧，并保留实际复核来源与边界不确定度。",
              "", "对齐表的三列为帧号、毫秒时间戳和插值加速度，没有事件标签。"
              "在 RGB 时间范围内取腰部 SVector 绝对一阶差分的最强峰，以差分末端采样时刻做线性插值并四舍五入到帧。"
              "冲击、扶撑、先行步态或缓慢滑倒都会使最强峰偏离失衡起点。",
              "", "复核视频由 preview.py 从 cam0 PNG 合成。以躯干偏移、支撑失稳及随后连续下坠为视觉依据。"
-             "auto_onset 为 IMU 自动候选。负责人批准前十段写入 fall_onset，其中六段由负责人逐帧抽检。"
+             "auto_onset 为 IMU 自动候选。人工复核确认前十段写入 fall_onset，其中六段经人工逐帧复核。"
              "其余二十段跌倒仅保留自动值。40 段 ADL 的 fall_onset 留空。", "",
              "|段号|峰时刻 ms|峰值差分|auto_onset|视频判读帧|判读减候选（帧）|不确定度|review|观察与修正记录|",
              "|---|---:|---:|---:|---:|---:|---|---|---|"]

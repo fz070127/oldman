@@ -12,11 +12,11 @@
 |---|---|
 | [backend/](backend/) | FastAPI 服务：接口、数据库、告警流转 |
 | [frontend/](frontend/) | Vue 3 Web 管理端 + 社区大屏 |
+| [frontend-h5/](frontend-h5/) | uni-app 家属端（H5） |
 | [algo/](algo/) | 跌倒检测算法：数据管线、姿态提取、判定引擎 |
+| [edge/](edge/) | 边缘推理 Agent：拉流、推理、MQTT 上报、断网补传 |
+| [deploy/](deploy/) | Docker Compose、Nginx、初始化脚本 |
 | [tools/](tools/) | 数据获取工具 |
-
-`edge/`（边缘推理 Agent）、`frontend-h5/`（uni-app 家属端）、`deploy/`（容器编排）
-尚未开工。
 
 ## 快速开始
 
@@ -97,9 +97,10 @@ python scripts/analyze_keypoints.py
 .
 ├── backend/          # FastAPI 服务
 ├── frontend/         # Vue3 Web 管理端 + 大屏
+├── frontend-h5/      # uni-app 家属端
 ├── algo/             # 数据管线、姿态提取、判定引擎
-├── tools/            # 数据获取工具
-├── edge/             # 边缘推理 Agent（未开工）
-├── frontend-h5/      # uni-app 家属端（未开工）
-└── deploy/           # Docker Compose、Nginx（未开工）
+├── edge/             # 边缘推理 Agent
+├── deploy/           # Docker Compose、Nginx
+├── scripts/          # 压测等运维脚本
+└── tools/            # 数据获取工具
 ```

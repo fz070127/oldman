@@ -80,6 +80,6 @@ python scripts/analyze_keypoints.py
 
 姿态数组位于 `data/processed/keypoints/`，可用 `np.load(path, allow_pickle=False)` 读取。帧号从 1 起，`n_people` 保存筛选最高两人前的数量。两个槽位按每帧检测分排序，空槽置零；跨帧跟踪时需另外建立身份关联。骨架视频写入 `data/processed/overlays/`。
 
-起始帧复核使用 `python scripts/preview.py --seq fall-01` 生成的原始画面视频。在 `reports/onset_review.csv` 填写 1 起帧号、观察依据和复核来源。`frame` 是开始失衡的第一帧，`lying_from` 是可明确观察到卧地且延续至片尾的抽样起帧。`review` 如实填写「负责人抽检」或「未人工逐帧复核」；边界不确定度写入 `uncertainty_frames`。取得负责人登记许可后标记 `approved=1`，执行 `python scripts/annotate_onset.py --apply` 写回相应 `fall_onset`。冻结划分直接引用序列 ID。
+起始帧复核使用 `python scripts/preview.py --seq fall-01` 生成的原始画面视频。在 `reports/onset_review.csv` 填写 1 起帧号、观察依据和复核来源。`frame` 是开始失衡的第一帧，`lying_from` 是可明确观察到卧地且延续至片尾的抽样起帧。`review` 如实填写「人工逐帧复核」或「未人工逐帧复核」；边界不确定度写入 `uncertainty_frames`。取得人工复核登记许可后标记 `approved=1`，执行 `python scripts/annotate_onset.py --apply` 写回相应 `fall_onset`。冻结划分直接引用序列 ID。
 
 两份报告分别见 [关键点质量](reports/keypoint_quality.md) 和 [起始帧记录](reports/onset_annotation.md)。
