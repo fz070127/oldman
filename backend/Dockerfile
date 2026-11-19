@@ -2,6 +2,7 @@ FROM python:3.11-slim AS builder
 WORKDIR /build
 COPY pyproject.toml .
 COPY app ./app
+COPY config/escalate.yaml ./config/escalate.yaml
 RUN python -m venv /opt/venv && /opt/venv/bin/pip install --no-cache-dir .
 
 FROM python:3.11-slim AS runtime

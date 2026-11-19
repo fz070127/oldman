@@ -10,6 +10,7 @@ from app.models.enums import Action
 from app.models.enums import AlarmStatus as S
 from app.schemas.events import Ack, Dispatch, Resolve
 from app.schemas.records import CHINA
+from app.services.escalation_rules import EscalationRules, notified_at
 from app.services.event_queries import event_fields, filtered, page_rows, period, scoped
 from app.services.records import mask_phone, resolve_directory_id
 
@@ -70,11 +71,13 @@ def alarm_query(scope):
     )
 
 
-def alarm_fields(alarm, elder, event, community, handler, device_no):
+def alarm_fields(alarm, elder, event, community, handler, device_no, *, rules: EscalationRules):
     remaining = None
     if alarm.status == S.PENDING:
-        age = (datetime.now(UTC) - (alarm.notified_at or alarm.created_at)).total_seconds()
-        remaining = max(0, min(60, ceil(60 - age)))
+        window = rules.window(alarm.level, alarm.escalate_step + 1)
+        if window is not None:
+            age = (datetime.now(UTC) - notified_at(alarm)).total_seconds()
+            remaining = max(0, ceil(window - max(0, age)))
     return {
         "id": alarm.id,
         "level": alarm.level,
@@ -109,12 +112,12 @@ async def find_alarm(db, alarm_id, scope, *, lock=False):
     return row
 
 
-async def list_alarms(db, query, scope):
+async def list_alarms(db, query, scope, rules):
     statement = filtered(
         alarm_query(scope), query, Alarm, Alarm.created_at, ("elder_id", "level", "status")
     )
     rows, total = await page_rows(db, statement, query, Alarm.created_at, Alarm.id)
-    return [alarm_fields(*row) for row in rows], total
+    return [alarm_fields(*row, rules=rules) for row in rows], total
 
 
 async def pending_count(db, scope):
@@ -197,10 +200,16 @@ def build_timeline(event, actions):
     for action, actor, recipient in actions:
         details = action.detail or {}
         role = ROLES.get(actor.role_code, "")
-        fallback = "网格员" if action.action == Action.ESCALATE else "家属"
+        fallback = ROLES.get(
+            (details.get("target") or "").upper(),
+            "网格员" if action.action == Action.ESCALATE else "家属",
+        )
         to_role = ROLES.get(recipient.role_code, fallback) if recipient else fallback
         name = details.get("toName") or (recipient.nickname if recipient else None)
-        text = TIMELINE.get(action.action, "已记录处置操作").format(
+        template = TIMELINE.get(action.action, "已记录处置操作")
+        if action.action == Action.NOTIFY and action.result == "FAILED":
+            template = "{recipient}的通知发送失败"
+        text = template.format(
             role=role,
             actor=actor.nickname,
             recipient=f"{to_role}（{name}）" if name else to_role,
@@ -210,7 +219,7 @@ def build_timeline(event, actions):
     return sorted(items, key=lambda item: item["ts"])
 
 
-async def alarm_detail(db, row, scope):
+async def alarm_detail(db, row, scope, rules):
     alarm, elder, event, _, _, device_no = row
     recipient = aliased(User)
     actions = (
@@ -228,7 +237,7 @@ async def alarm_detail(db, row, scope):
         )
     ).all()
     return {
-        **alarm_fields(*row),
+        **alarm_fields(*row, rules=rules),
         "elder": elder_info(elder),
         "event": event_fields(event, elder, device_no, full=True),
         "actions": [

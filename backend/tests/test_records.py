@@ -145,7 +145,7 @@ async def seed_records(db):
 
 
 @pytest.fixture
-async def records_server():
+async def records_server(monkeypatch):
     url = os.getenv("TEST_DATABASE_URL")
     if not url:
         pytest.skip("Set TEST_DATABASE_URL to run records integration tests")
@@ -156,9 +156,10 @@ async def records_server():
     settings = Settings(
         _env_file=None,
         jwt_secret="test-only-signing-key-for-records",
-        **({"redis_url": redis_url} if redis_url else {}),
+        redis_url=redis_url or "redis://127.0.0.1:1/0",
     )
     app = create_app(settings)
+    monkeypatch.setattr("app.main.create_async_engine", lambda _: engine)
     factory = async_sessionmaker(engine, expire_on_commit=False)
     tokens = TokenIssuer(settings)
     headers = {
@@ -177,7 +178,6 @@ async def records_server():
                 transport=httpx.ASGITransport(app=app), base_url="http://test/api/v1"
             ) as client,
         ):
-            app.state.db = engine
             if not redis_url:
                 # spec=Redis 会把 exists 变成同步 Mock（redis-py 用装饰器包装协程方法，
                 # inspect.iscoroutinefunction 返回 False），await 时抛 TypeError。

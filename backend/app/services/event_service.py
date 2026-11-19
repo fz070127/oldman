@@ -11,10 +11,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from app.core.config import Settings
 from app.core.exceptions import BizException
-from app.models import Alarm, AlarmAction, Device, Elder, Event, FamilyBinding, User
-from app.models.enums import Action, AlarmStatus, Channel
+from app.models import Alarm, AlarmAction, Device, Elder, Event
+from app.models.enums import Action, AlarmStatus
 from app.schemas.events import IngestPayload
 from app.services.audit_service import AuditService
+from app.services.escalation_service import EscalationEngine
 from app.services.event_queries import scoped
 from app.services.notify import dispatcher
 from app.services.records import commit_and_audit
@@ -95,15 +96,7 @@ async def record_alarm(db, redis, event):
             )
         return None
 
-    recipient = (
-        await db.execute(
-            select(User.id, User.nickname)
-            .join(FamilyBinding, FamilyBinding.user_id == User.id)
-            .where(FamilyBinding.elder_id == event.elder_id, User.status == 1)
-            .order_by(FamilyBinding.is_primary.desc(), FamilyBinding.notify_order, User.id)
-            .limit(1)
-        )
-    ).one_or_none()
+    recipient = await dispatcher.find_recipient(db, event.elder_id, "family_primary")
     now = datetime.now(UTC)
     alarm = Alarm(
         id=alarm_id,
@@ -118,19 +111,6 @@ async def record_alarm(db, redis, event):
     )
     db.add(alarm)
     await db.flush()
-    db.add(
-        AlarmAction(
-            alarm_id=alarm.id,
-            actor_id="SYSTEM",
-            action=Action.NOTIFY,
-            channel=Channel.PUSH,
-            result="SENT",
-            created_at=now,
-            detail={"to": recipient.id, "toName": recipient.nickname} if recipient else {},
-        )
-    )
-    await db.flush()
-    await dispatcher.notify_new_alarm(alarm)
     return alarm
 
 
@@ -139,12 +119,16 @@ async def ingest(
     payload: IngestPayload | dict,
     *,
     redis: Redis | None = None,
+    escalation: EscalationEngine | None = None,
     scope=None,
     actor_id="SYSTEM",
     audit: AuditService | None = None,
 ) -> tuple[Event, Alarm | None]:
     """Own one unit of work on a dedicated session (expire_on_commit=False)."""
     payload = IngestPayload.model_validate(payload)
+    escalation = escalation or db.info.get("escalation")
+    if redis is None and escalation is not None:
+        redis = escalation.queue.redis
     try:
         device, elder = await source(db, payload, scope)
         values = payload.model_dump(exclude={"elder_id", "device_no"})
@@ -186,7 +170,22 @@ async def ingest(
             event.id,
             {"event_id": event.event_id, "level": event.level},
         )
-        return event, alarm
     except BaseException:
         await db.rollback()
         raise
+
+    if alarm is not None:
+        try:
+            if escalation is not None:
+                await escalation.new_alarm(alarm)
+            else:
+                settings = Settings()
+                sessions = async_sessionmaker(db.bind, expire_on_commit=False)
+                if redis is None:
+                    async with Redis.from_url(settings.redis_url) as client:
+                        await EscalationEngine(settings, sessions, client).new_alarm(alarm)
+                else:
+                    await EscalationEngine(settings, sessions, redis).new_alarm(alarm)
+        except Exception:
+            log.exception("alarm_post_commit_error", alarm_id=alarm.id)
+    return event, alarm

@@ -89,7 +89,8 @@ async def test_errors(service, path, status, code, message, capsys):
     assert payload["message"].startswith(message)
     assert response.headers["access-control-allow-origin"] == "http://localhost:5173"
     if status == 500:
-        entry = json.loads(capsys.readouterr().out)
+        entries = [json.loads(line) for line in capsys.readouterr().out.splitlines()]
+        entry = next(item for item in entries if item.get("traceId") == trace)
         assert entry["level"] == "error"
         assert entry["traceId"] == trace
         assert "Traceback" in entry["exception"] and "RuntimeError" in entry["exception"]

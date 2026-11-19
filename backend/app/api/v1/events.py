@@ -91,12 +91,19 @@ async def mock_event(
         **body.model_dump(), device_no=device.device_no, algo_version=device.algo_version
     )
     event, alarm = await event_service.ingest(
-        db, payload, redis=request.app.state.redis, scope=scope, actor_id=actor.id, audit=audit
+        db,
+        payload,
+        redis=request.app.state.redis,
+        escalation=request.app.state.escalation,
+        scope=scope,
+        actor_id=actor.id,
+        audit=audit,
     )
     row = await event_queries.find_event(db, event.id, scope)
     alarm_data = None
     if alarm is not None:
         alarm_data = alarm_service.alarm_fields(
-            *await alarm_service.find_alarm(db, alarm.id, scope)
+            *await alarm_service.find_alarm(db, alarm.id, scope),
+            rules=request.app.state.escalation.rules,
         )
     return R.ok({"event": event_queries.event_fields(*row, full=True), "alarm": alarm_data})

@@ -1,0 +1,10 @@
+default:
+  - {after_sec: 60,  to: family_primary,  channels: [PUSH, SMS]}
+  - {after_sec: 120, to: guardian,        channels: [SMS, CALL]}
+  - {after_sec: 180, to: community_admin, channels: [WS, CALL]}
+levels:
+  P0: default
+  P1:
+    - {after_sec: 300, to: family_primary, channels: [PUSH]}
+  P2:
+    - {after_sec: 600, to: admin, channels: [INBOX]}

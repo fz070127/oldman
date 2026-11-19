@@ -16,6 +16,7 @@ dependencies = [
     "redis>=5,<8",
     "pydantic>=2,<3",
     "pydantic-settings>=2,<3",
+    "PyYAML>=6,<7",
     "structlog",
     "python-jose[cryptography]",
     "bcrypt",
@@ -30,6 +31,9 @@ dependencies = [
 [tool.setuptools.packages.find]
 include = ["app", "app.*"]
 namespaces = false
+
+[tool.setuptools.data-files]
+"share/silver-bell" = ["config/escalate.yaml"]
 
 [tool.ruff]
 line-length = 100

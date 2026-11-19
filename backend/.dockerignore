@@ -2,5 +2,7 @@
 !pyproject.toml
 !app/
 !app/**
+!config/
+!config/escalate.yaml
 **/__pycache__/
 **/*.pyc

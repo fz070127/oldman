@@ -64,3 +64,20 @@ docker run --rm --env-file .env -p 8000:8000 silver-bell-backend:m1
 ```
 
 镜像以非 root 用户启动。容器中的连接地址应使用依赖服务的网络名称，连接 Windows 宿主机可使用 `host.docker.internal`。如果修改 `APP_PORT`，端口映射右侧也要改为相同值。
+
+## 告警升级与通知（M6）
+
+服务在启动时加载 `config/escalate.yaml`。每行的 `after_sec` 都从同一个 `notified_at` 起算。P0 建单时向启用的主联系人发 PUSH、SMS。第 60 秒转给老人绑定的网格员，第 120 秒转给本社区管理员，第 180 秒再次提醒该管理员。P1 在第 300 秒提醒主联系人。P2 的规则适用于已有告警，M5 ingest 对 P2 只记录事件。
+
+本地在启动服务前设置以下变量，P0 的三个累计时点会缩短到 5、10、15 秒，扫描周期缩短到 0.1 秒。默认倍率为 1，默认每 2 秒扫描一次。
+
+```powershell
+$env:ESCALATE_TIME_SCALE = '0.08333333333333333'
+$env:ESCALATE_POLL_INTERVAL_SEC = '0.1'
+```
+
+可用 `ESCALATE_CONFIG_PATH` 指定 YAML 文件。进程内调用 `app.state.escalation.rules.reload()` 重新读取文件，校验失败时保留上次成功的配置。Redis 在线时，扫描器在启动或重载后根据数据库中的未处置告警补排下一级。Redis 离线时，已在内存中排队的任务到期时会重新校验截止时间，缩短窗口的验收请先改配置再造告警。
+
+Redis 使用 ZSET `alarm:escalate` 跨 API 重启保留任务。Redis 不可用时，扫描器记录 `alarm_escalation_redis_degraded` 警告并使用进程内 `asyncio.PriorityQueue`。**服务重启会丢失尚在内存中的任务**。Redis 恢复连接后，扫描器把内存中仍在等待的任务写回 ZSET。独立运行的 ingest 生产者和扫描器若需在 Redis 离线时协作，须共享同一个进程内的 `EscalationEngine`。
+
+`NOTIFY_PROVIDER=mock` 是默认值，PUSH、SMS、CALL 记录 mock 日志。选 `aliyun` 可走供应商骨架，M6 骨架记录警告后调用 mock。INBOX 写入 M2 的 notification 表，WS 调用 M7 占位函数并返回失败。每个渠道独立发送、重试和写流水，重试间隔为 2 秒、5 秒。NOTIFY 流水的 `detail.attempts` 表示实际尝试次数。任一渠道失败均保留已提交的告警。

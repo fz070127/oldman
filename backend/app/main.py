@@ -12,7 +12,7 @@ from redis.asyncio import Redis
 from redis.exceptions import RedisError
 from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncEngine, async_sessionmaker, create_async_engine
 
 from app.api.v1.events import mock_router
 from app.api.v1.router import router
@@ -20,6 +20,7 @@ from app.core.config import Settings
 from app.core.exceptions import register_handlers
 from app.core.logging import TraceMiddleware, configure_logging
 from app.core.response import R
+from app.services.escalation_service import EscalationEngine
 
 DependencyStatus = Literal["up", "down"]
 
@@ -69,7 +70,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
             resources.push_async_callback(redis.aclose)
             application.state.db = engine
             application.state.redis = redis
-            yield
+            sessions = application.state.db_sessionmaker = async_sessionmaker(
+                engine, expire_on_commit=False
+            )
+            escalation = application.state.escalation = EscalationEngine(settings, sessions, redis)
+            sessions.configure(info={"escalation": escalation})
+            worker = asyncio.create_task(escalation.run(), name="alarm-escalation")
+            try:
+                yield
+            finally:
+                worker.cancel()
+                await asyncio.gather(worker, return_exceptions=True)
 
     application = FastAPI(title="银铃守护 API", version="1.0.0", lifespan=lifespan)
     application.state.settings = settings

@@ -170,14 +170,16 @@ async def test_replay_dedup_ack_false_positive_and_timeline(m5):
     actions = detail["actions"]
     assert [a["action"] for a in actions] == [
         "NOTIFY",
+        "NOTIFY",
         "DEDUP",
         "DEDUP",
         "DEDUP",
         "ACK",
         "MARK_FALSE",
     ]
-    assert actions[0]["channel"] == "PUSH" and actions[0]["result"] == "SENT"
-    assert all(a["actor"] == "SYSTEM" for a in actions[:4])
+    assert {a["channel"] for a in actions[:2]} == {"PUSH", "SMS"}
+    assert all(a["result"] == "SENT" for a in actions[:2])
+    assert all(a["actor"] == "SYSTEM" for a in actions[:5])
     assert actions[-1]["detail"] == resolution
     assert (
         detail["elder"]["phone"] == "138****5678"
@@ -341,7 +343,7 @@ async def test_dispatch_and_resolution_without_ack(m5):
     assert detail["timeline"][-1]["text"] == "已完结，结果：真实跌倒"
 
 
-async def test_ingest_rollback_then_retry(m5, monkeypatch):
+async def test_ingest_validation_failure_and_post_commit_notification_failure(m5, monkeypatch):
     m = m5
     payload = {**m.body, "deviceNo": m.device}
     async with m.factory() as db:
@@ -350,20 +352,24 @@ async def test_ingest_rollback_then_retry(m5, monkeypatch):
                 db, payload | {"deviceNo": "missing"}, redis=m.app.state.redis
             )
         assert error.value.code == 1004
+        assert not await db.scalar(select(Event.id).where(Event.elder_id == m.elder))
+        assert not await db.scalar(select(Alarm.id).where(Alarm.elder_id == m.elder))
+        assert not await db.scalar(select(AlarmAction.id))
         with monkeypatch.context() as patch:
             patch.setattr(
                 dispatcher,
                 "notify_new_alarm",
                 AsyncMock(side_effect=RuntimeError("inject failure")),
             )
-            with pytest.raises(RuntimeError, match="inject failure"):
-                await event_service.ingest(db, payload, redis=m.app.state.redis)
-        assert not await db.scalar(select(Event.id).where(Event.elder_id == m.elder))
-        assert not await db.scalar(select(Alarm.id).where(Alarm.elder_id == m.elder))
-        assert not await db.scalar(select(AlarmAction.id))
-        _, alarm = await event_service.ingest(db, payload, redis=m.app.state.redis)
+            event, alarm = await event_service.ingest(
+                db, payload, redis=m.app.state.redis, escalation=m.app.state.escalation
+            )
         assert alarm.status == "PENDING"
-        assert await db.scalar(select(func.count()).select_from(AlarmAction)) == 1
+        assert await db.scalar(select(Event.id).where(Event.id == event.id)) == event.id
+        assert await db.scalar(select(Alarm.id).where(Alarm.id == alarm.id)) == alarm.id
+        assert not await db.scalar(select(AlarmAction.id))
+        _, replayed = await event_service.ingest(db, payload, redis=m.app.state.redis)
+        assert replayed.id == alarm.id
 
 
 async def test_redis_failure_degrades(m5, monkeypatch, capsys, unused_tcp_port):

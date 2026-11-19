@@ -1,8 +1,16 @@
+import sys
 from pathlib import Path
 from typing import Literal
 
 from pydantic import Field, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def default_rules_path() -> Path:
+    source = Path(__file__).resolve().parents[2] / "config" / "escalate.yaml"
+    if source.is_file():
+        return source
+    return Path(sys.prefix) / "share" / "silver-bell" / "escalate.yaml"
 
 
 class Settings(BaseSettings):
@@ -29,4 +37,7 @@ class Settings(BaseSettings):
     mqtt_user: str = ""
     mqtt_pass: SecretStr = SecretStr("")
     notify_provider: Literal["mock", "aliyun"] = "mock"
+    escalate_config_path: Path = Field(default_factory=default_rules_path)
+    escalate_time_scale: float = Field(default=1, gt=0, allow_inf_nan=False)
+    escalate_poll_interval_sec: float = Field(default=2, gt=0, allow_inf_nan=False)
     cors_origins: list[str] = Field(default_factory=lambda: ["http://localhost:5173"])
