@@ -71,12 +71,15 @@ export interface EventItem {
   handleResult: EventHandleResult | null
   handleRemark: string | null
   handledAt: string | null
+  /** 可选：处置操作人名称（前端回显用） */
+  handlerName?: string | null
 }
 
-/** 事件详情（契约 3.6 GET /events/{id} = EventItem + features + algoVersion） */
+/** 事件详情（契约 3.6 GET /events/{id} = EventItem + features + algoVersion，可选附带 media） */
 export interface EventDetail extends EventItem {
   features: EventFeatures
   algoVersion: string
+  media?: EventMedia
 }
 
 /** GET /events 查询参数 */

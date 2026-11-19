@@ -58,3 +58,4 @@ Thumbs.db
 logs/
 tmp/
 .cache/
+.worktrees/
