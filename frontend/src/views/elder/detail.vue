@@ -1,5 +1,5 @@
 <template>
-  <div v-loading="loading" class="elder-detail-page">
+  <div v-loading="loading && Boolean(detail)" class="elder-detail-page">
     <!-- 顶部操作栏 -->
     <PageContainer :title="detail ? `老人档案详情 · ${detail.name}` : '老人档案详情'">
       <template #extra>
@@ -24,9 +24,29 @@
         </el-button>
       </template>
 
-      <EmptyState v-if="!loading && !detail" description="未找到该老人档案信息" />
+      <div v-if="loading && !detail" class="detail-skeleton">
+        <el-skeleton :rows="10" animated />
+      </div>
 
-      <div v-else-if="detail" class="elder-detail__blocks">
+      <EmptyState
+        v-else-if="loadError"
+        mode="error"
+        title="老人档案详情加载失败"
+        description="网络连接异常或服务暂不可用，请检查网络连接后重试"
+        action-text="加载失败，点击重试"
+        @action="loadDetail"
+      />
+
+      <EmptyState
+        v-else-if="!detail"
+        mode="empty"
+        title="未找到该老人档案"
+        description="该老人档案可能已被移除或编号有误"
+        action-text="返回列表"
+        @action="router.push('/elder')"
+      />
+
+      <div v-else class="elder-detail__blocks">
         <!-- 1. 基本信息 -->
         <section class="detail-block">
           <h3 class="detail-block__title">一、基本信息</h3>
@@ -218,19 +238,19 @@
 
     <!-- 绑定家属弹窗 -->
     <el-dialog v-model="bindDialogVisible" title="绑定家属" width="440px" destroy-on-close>
-      <el-form :model="bindForm" label-width="96px">
-        <el-form-item label="家属姓名">
-          <el-input v-model.trim="bindForm.name" placeholder="请输入家属姓名" />
+      <el-form ref="bindFormRef" :model="bindForm" :rules="bindRules" label-width="96px" status-icon>
+        <el-form-item label="家属姓名" prop="name">
+          <el-input v-model.trim="bindForm.name" placeholder="请输入家属姓名" maxlength="32" />
         </el-form-item>
-        <el-form-item label="手机号码">
+        <el-form-item label="手机号码" prop="phone">
           <el-input v-model.trim="bindForm.phone" placeholder="11 位手机号" maxlength="11" />
         </el-form-item>
-        <el-form-item label="亲属关系">
+        <el-form-item label="亲属关系" prop="relation">
           <el-select v-model="bindForm.relation" style="width: 100%">
             <el-option v-for="r in FAMILY_RELATIONS" :key="r" :label="r" :value="r" />
           </el-select>
         </el-form-item>
-        <el-form-item label="通知顺序">
+        <el-form-item label="通知顺序" prop="notifyOrder">
           <el-input-number v-model="bindForm.notifyOrder" :min="1" :max="10" />
         </el-form-item>
         <el-form-item label="主要联系人">
@@ -239,13 +259,21 @@
       </el-form>
       <template #footer>
         <el-button @click="bindDialogVisible = false">取 消</el-button>
-        <el-button type="primary" :loading="bindingSubmit" @click="submitBindFamily">确 定</el-button>
+        <el-button
+          type="primary"
+          :loading="bindingSubmit"
+          :disabled="bindingSubmit"
+          @click="submitBindFamily"
+        >
+          确 定
+        </el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { FormInstance, FormRules } from 'element-plus'
 import { ArrowLeft, Edit } from '@element-plus/icons-vue'
 import {
   bindElderFamily,
@@ -270,6 +298,7 @@ const route = useRoute()
 const router = useRouter()
 
 const loading = ref(false)
+const loadError = ref(false)
 const detail = ref<ElderDetail | null>(null)
 const editDialogVisible = ref(false)
 
@@ -304,8 +333,11 @@ const elderAsRow = computed<Elder | null>(() => {
 async function loadDetail() {
   if (!elderId.value) return
   loading.value = true
+  loadError.value = false
   try {
     detail.value = await getElderDetail(elderId.value)
+  } catch {
+    loadError.value = true
   } finally {
     loading.value = false
   }
@@ -334,6 +366,7 @@ function goEventDetail(eventId: string) {
 // ---------------- 家属绑定 / 解绑 ----------------
 const bindDialogVisible = ref(false)
 const bindingSubmit = ref(false)
+const bindFormRef = ref<FormInstance>()
 const bindForm = reactive({
   name: '',
   phone: '',
@@ -342,12 +375,19 @@ const bindForm = reactive({
   notifyOrder: 1,
 })
 
+const bindRules: FormRules = {
+  name: [{ required: true, message: '请输入家属姓名', trigger: 'blur' }],
+  phone: [
+    { required: true, message: '请输入手机号码', trigger: 'blur' },
+    { pattern: /^1\d{10}$/, message: '请输入以 1 开头的 11 位手机号', trigger: 'blur' },
+  ],
+  relation: [{ required: true, message: '请选择亲属关系', trigger: 'change' }],
+}
+
 async function submitBindFamily() {
-  if (!detail.value) return
-  if (!bindForm.name || !/^1\d{10}$/.test(bindForm.phone)) {
-    ElMessage.warning('请填写正确的家属姓名和 11 位手机号')
-    return
-  }
+  if (!detail.value || bindingSubmit.value) return
+  const valid = await bindFormRef.value?.validate().catch(() => false)
+  if (!valid) return
   bindingSubmit.value = true
   try {
     await bindElderFamily(detail.value.id, { ...bindForm })

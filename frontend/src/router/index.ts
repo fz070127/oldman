@@ -24,7 +24,7 @@ export const asyncRoutes: RouteRecordRaw[] = [
   {
     path: 'dashboard',
     name: 'Dashboard',
-    component: Placeholder,
+    component: () => import('@/views/dashboard/index.vue'),
     meta: { title: '工作台', icon: markRaw(Odometer), menuKey: 'dashboard', affix: true },
   },
   {
@@ -88,19 +88,19 @@ export const asyncRoutes: RouteRecordRaw[] = [
       {
         path: 'users',
         name: 'SystemUsers',
-        component: Placeholder,
+        component: () => import('@/views/system/users.vue'),
         meta: { title: '用户管理', menuKey: 'system', permission: 'system:read' },
       },
       {
         path: 'roles',
         name: 'SystemRoles',
-        component: Placeholder,
+        component: () => import('@/views/system/roles.vue'),
         meta: { title: '角色管理', menuKey: 'system', permission: 'system:read' },
       },
       {
         path: 'communities',
         name: 'SystemCommunities',
-        component: Placeholder,
+        component: () => import('@/views/system/communities.vue'),
         meta: { title: '社区管理', menuKey: 'system', permission: 'system:read' },
       },
     ],
@@ -132,6 +132,12 @@ export const constantRoutes: RouteRecordRaw[] = [
     name: 'NotFound',
     component: () => import('@/views/error/404.vue'),
     meta: { title: '页面不存在', hidden: true },
+  },
+  {
+    path: '/500',
+    name: 'ServerError',
+    component: () => import('@/views/error/500.vue'),
+    meta: { title: '服务器异常', hidden: true },
   },
   {
     path: '/',

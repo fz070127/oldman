@@ -163,6 +163,11 @@ function goDetail(id: string) {
 
 const rebootingId = ref('')
 async function handleReboot(row: Device) {
+  await ElMessageBox.confirm(
+    `确定向设备「${row.deviceNo}」下发远程重启指令吗？重启期间设备将短暂离线。`,
+    '远程重启确认',
+    { type: 'warning', confirmButtonText: '确定重启', cancelButtonText: '取消' },
+  )
   rebootingId.value = row.id
   try {
     await rebootDevice(row.id)

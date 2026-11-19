@@ -1,13 +1,33 @@
 <template>
-  <div v-loading="loading" class="event-detail-page">
+  <div v-loading="loading && Boolean(detail)" class="event-detail-page">
     <PageContainer :title="detail ? `事件详情 · ${detail.id}` : '事件详情'">
       <template #extra>
         <el-button :icon="ArrowLeft" @click="router.push('/event')">返回列表</el-button>
       </template>
 
-      <EmptyState v-if="!loading && !detail" description="未找到该事件记录" />
+      <div v-if="loading && !detail" class="detail-skeleton">
+        <el-skeleton :rows="10" animated />
+      </div>
 
-      <div v-else-if="detail" class="event-detail__layout">
+      <EmptyState
+        v-else-if="loadError"
+        mode="error"
+        title="事件详情加载失败"
+        description="无法获取事件关键帧与算法特征数据，请检查网络连接后重试"
+        action-text="加载失败，点击重试"
+        @action="loadAll"
+      />
+
+      <EmptyState
+        v-else-if="!detail"
+        mode="empty"
+        title="未找到该事件记录"
+        description="该事件记录可能不存在或已被清理"
+        action-text="返回列表"
+        @action="router.push('/event')"
+      />
+
+      <div v-else class="event-detail__layout">
         <!-- 左侧 60%：关键帧序列 + 脱敏片段播放器 + features 特征表格 -->
         <div class="event-detail__left">
           <!-- 1. 关键帧序列（横向 6 张缩略图，点击弹大图） -->
@@ -236,6 +256,7 @@
                 <el-button
                   type="danger"
                   :loading="submitting"
+                  :disabled="submitting"
                   @click="submitHandle(EventHandleResult.TRUE_FALL)"
                 >
                   确认属实
@@ -244,6 +265,7 @@
                   type="warning"
                   plain
                   :loading="submitting"
+                  :disabled="submitting"
                   @click="submitHandle(EventHandleResult.FALSE_POSITIVE)"
                 >
                   标记误报
@@ -294,6 +316,7 @@ const userStore = useUserStore()
 
 const eventId = computed(() => String(route.params.id || ''))
 const loading = ref(false)
+const loadError = ref(false)
 const detail = ref<EventDetail | null>(null)
 const media = ref<EventMedia | null>(null)
 const elderInfo = ref<ElderDetail | null>(null)
@@ -346,6 +369,7 @@ function openKeyframePreview(thumbUrl: string, idx: number) {
 async function loadAll() {
   if (!eventId.value) return
   loading.value = true
+  loadError.value = false
   try {
     const [ev, med] = await Promise.all([
       getEventDetail(eventId.value),
@@ -360,6 +384,8 @@ async function loadAll() {
     ])
     elderInfo.value = elder
     deviceInfo.value = dev
+  } catch {
+    loadError.value = true
   } finally {
     loading.value = false
   }
@@ -370,8 +396,14 @@ const remarkInput = ref('')
 const submitting = ref(false)
 
 async function submitHandle(result: EventHandleResult) {
-  if (!detail.value) return
+  if (!detail.value || submitting.value) return
   const isFalse = result === EventHandleResult.FALSE_POSITIVE
+  const actionLabel = isFalse ? '标记为误报' : '确认属实'
+  await ElMessageBox.confirm(
+    `确定将该事件复核结果提交为「${actionLabel}」吗？`,
+    '事件复核确认',
+    { type: isFalse ? 'warning' : 'info', confirmButtonText: '确定提交', cancelButtonText: '取消' },
+  )
   const remark =
     remarkInput.value.trim() || (isFalse ? '人工复核标记为误报' : '人工复核确认事件属实')
 

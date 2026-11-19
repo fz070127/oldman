@@ -78,7 +78,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, defineAsyncComponent, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import dayjs from 'dayjs'
 import {
@@ -98,12 +98,13 @@ import type {
   TrendItem,
 } from '@/types/dashboard'
 import { EventLevel, EventType } from '@/types/event'
-import AlarmTrendChart from './components/AlarmTrendChart.vue'
-import CommunityMap from './components/CommunityMap.vue'
-import DeviceOnlineChart from './components/DeviceOnlineChart.vue'
 import KpiPanel from './components/KpiPanel.vue'
-import LevelPieChart from './components/LevelPieChart.vue'
 import RealtimeStream from './components/RealtimeStream.vue'
+
+const AlarmTrendChart = defineAsyncComponent(() => import('./components/AlarmTrendChart.vue'))
+const CommunityMap = defineAsyncComponent(() => import('./components/CommunityMap.vue'))
+const DeviceOnlineChart = defineAsyncComponent(() => import('./components/DeviceOnlineChart.vue'))
+const LevelPieChart = defineAsyncComponent(() => import('./components/LevelPieChart.vue'))
 
 const DESIGN_WIDTH = 1920
 const DESIGN_HEIGHT = 1080
