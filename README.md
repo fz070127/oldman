@@ -29,15 +29,24 @@ cd backend
 python -m venv .venv
 .venv/Scripts/python.exe -m pip install -e .
 cp .env.example .env
+# 编辑 .env，至少填写 JWT_SECRET 和 DEMO_SEED_PASSWORD
 .venv/Scripts/python.exe -m alembic upgrade head
 .venv/Scripts/python.exe -m app.db.seed
 .venv/Scripts/python.exe -m uvicorn app.main:app --reload --loop asyncio:SelectorEventLoop
 ```
 
+`.env` 的完整变量表见 [backend/README.md](backend/README.md)。
+
 服务默认监听 8000，`/health` 返回存活状态，`/docs` 是 Swagger UI。
 
-演示账号统一密码 `123456`：`admin`、`guardian01`–`guardian20`、
-`community01`–`community05`、`family01`–`family20`。
+演示账号 `admin`、`guardian01`–`guardian20`、`community01`–`community05`、
+`family01`–`family20`，密码取首次填充数据时的 `DEMO_SEED_PASSWORD`。
+
+演示前先刷新一次演示数据（恢复设备心跳、重置待确认告警时间）：
+
+```bash
+.venv/Scripts/python.exe -m app.db.seed --refresh-demo
+```
 
 ### 前端
 
