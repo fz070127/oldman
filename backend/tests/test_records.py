@@ -145,7 +145,7 @@ async def seed_records(db):
 
 
 @pytest.fixture
-async def records_app():
+async def records_server():
     url = os.getenv("TEST_DATABASE_URL")
     if not url:
         pytest.skip("Set TEST_DATABASE_URL to run records integration tests")
@@ -184,12 +184,18 @@ async def records_app():
                 # 这里用无 spec 的 AsyncMock，再由测试显式设定各方法行为。
                 app.state.redis = AsyncMock()
                 app.state.redis.exists.return_value = 0
-            yield client, headers, factory
+            yield app, client, headers, factory
     finally:
         await engine.dispose()
         async with admin_engine.begin() as connection:
             await connection.execute(text(f"DROP SCHEMA IF EXISTS {schema} CASCADE"))
         await admin_engine.dispose()
+
+
+@pytest.fixture
+async def records_app(records_server):
+    _, client, headers, factory = records_server
+    return client, headers, factory
 
 
 def response_data(response, *, status=200, code=0):

@@ -116,7 +116,10 @@ async def test_migration_round_trip(migrated):
     assert await migrated.scalar(text("select count(*) from alembic_version")) == 0
 
 
-async def test_event_id_unique(migrated):
+async def test_event_id_unique(db):
+    # Start with a real 0001 row; 0002 must preserve both the row and its unique constraint.
+    migrated = db
+    await migrated.run_sync(migration, command.upgrade, "0001")
     await migrated.execute(text("INSERT INTO community(id,name,address) VALUES ('c','C','A')"))
     await migrated.execute(
         text("""
@@ -130,6 +133,27 @@ async def test_event_id_unique(migrated):
         INSERT INTO event(id,event_id,device_id,elder_id,type,level,confidence,occurred_at)
         VALUES (:id,'same-edge-id','d','e','FALL','P0',0.9,now())""")
     await migrated.execute(statement, {"id": "first"})
+    await migrated.run_sync(migration, command.upgrade, "0002")
+    existing = (
+        await migrated.execute(
+            text("SELECT event_id, handle_remark, handled_at FROM event WHERE id='first'")
+        )
+    ).one()
+    assert existing == ("same-edge-id", None, None)
+    columns = (
+        await migrated.execute(
+            text("""
+        SELECT column_name, data_type, character_maximum_length, is_nullable
+        FROM information_schema.columns WHERE table_schema=current_schema()
+        AND table_name='event' AND column_name IN ('handle_remark','handled_at')
+        ORDER BY column_name
+    """)
+        )
+    ).all()
+    assert columns == [
+        ("handle_remark", "character varying", 512, "YES"),
+        ("handled_at", "timestamp with time zone", None, "YES"),
+    ]
     with pytest.raises(IntegrityError) as exc:
         async with migrated.begin_nested():
             await migrated.execute(statement, {"id": "second"})

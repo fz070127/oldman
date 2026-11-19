@@ -14,6 +14,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
+from app.api.v1.events import mock_router
 from app.api.v1.router import router
 from app.core.config import Settings
 from app.core.exceptions import register_handlers
@@ -83,6 +84,8 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     )
     application.add_middleware(TraceMiddleware)
     application.include_router(router)
+    if application.state.settings.app_env != "prod":
+        application.include_router(mock_router, prefix=router.prefix)
 
     @application.get("/health", response_model=HealthResponse, response_model_by_alias=True)
     async def health(request: Request) -> dict:

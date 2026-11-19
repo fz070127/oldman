@@ -40,6 +40,8 @@ class Event(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     handled: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
     handle_result: Mapped[str | None] = mapped_column(String(16))
+    handle_remark: Mapped[str | None] = mapped_column(String(512))
+    handled_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     __table_args__ = (
         Index("ix_event_elder_occurred_at", elder_id, occurred_at.desc()),
