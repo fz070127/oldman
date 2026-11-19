@@ -69,8 +69,9 @@ export const asyncRoutes: RouteRecordRaw[] = [
   {
     path: 'alarm',
     name: 'Alarm',
-    component: Placeholder,
-    meta: { title: '告警处置', icon: markRaw(Bell), menuKey: 'alarm', permission: 'alarm:read' },
+    alias: ['alarm/list'],
+    component: () => import('@/views/alarm/list.vue'),
+    meta: { title: '告警中心', icon: markRaw(Bell), menuKey: 'alarm', permission: 'alarm:read' },
   },
   {
     path: 'screen',

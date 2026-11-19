@@ -9,6 +9,7 @@ export const StorageKeys = {
   USER_INFO: 'user_info',
   SIDEBAR_COLLAPSED: 'sidebar_collapsed',
   REMEMBER_USERNAME: 'remember_username',
+  ALARM_MUTED: 'alarm_muted',
 } as const
 
 export const storage = {

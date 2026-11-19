@@ -1,6 +1,7 @@
 <template>
   <div class="layout">
     <Navbar />
+    <AlarmBanner />
     <div class="layout__body">
       <Sidebar />
       <div class="layout__main">
@@ -19,6 +20,7 @@
 </template>
 
 <script setup lang="ts">
+import AlarmBanner from '@/components/AlarmBanner.vue'
 import Navbar from './components/Navbar.vue'
 import Sidebar from './components/Sidebar.vue'
 import TabsBar from './components/TabsBar.vue'

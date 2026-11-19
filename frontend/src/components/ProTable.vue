@@ -78,9 +78,11 @@ export interface ProTableResult<Row = Record<string, unknown>> {
   pageSize?: number
 }
 
-export interface ProTableInstance {
+export interface ProTableInstance<Row = Record<string, unknown>> {
   reload: (resetPage?: boolean) => Promise<void>
   fetchData: () => Promise<void>
+  tableData: Row[]
+  total: number
 }
 
 const props = withDefaults(

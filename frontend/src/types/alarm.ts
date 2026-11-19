@@ -135,7 +135,7 @@ export interface AlarmDetail {
 
 /** GET /alarms 查询参数 */
 export interface AlarmQuery extends Partial<PageQuery> {
-  status?: AlarmStatus | ''
+  status?: AlarmStatus | string
   level?: EventLevel | ''
   elderId?: string
   startTime?: string
