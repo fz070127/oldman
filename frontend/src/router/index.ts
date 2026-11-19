@@ -76,8 +76,8 @@ export const asyncRoutes: RouteRecordRaw[] = [
   {
     path: 'screen',
     name: 'Screen',
-    component: Placeholder,
-    meta: { title: '社区大屏', icon: markRaw(DataBoard), menuKey: 'screen' },
+    component: () => import('@/views/screen/index.vue'),
+    meta: { title: '社区大屏', icon: markRaw(DataBoard), menuKey: 'screen', fullscreen: true },
   },
   {
     path: 'system',
