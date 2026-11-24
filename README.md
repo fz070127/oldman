@@ -104,3 +104,12 @@ python scripts/analyze_keypoints.py
 ├── scripts/          # 压测等运维脚本
 └── tools/            # 数据获取工具
 ```
+
+## 系统管理、检测演示和模型监控
+
+- 管理员可在「系统管理」查看角色和网格员，维护用户、社区及用户启停状态。新建用户时填写该账号的初始密码。
+- 登录后可打开 `/demo/detect` 播放跌倒流程演示。具备 `dashboard:read` 权限的账号可打开 `/demo/image-detect` 上传图片或运行内置样例。图片检测返回关键点与单帧姿态风险，跌倒确认需结合多帧或人工复核。
+- 模型监控接口位于 `/api/v1/model-monitor`，提供分数、延迟分位数和近期漂移快照。边缘上报和权限见 [边缘端说明](edge/README.md)。
+- 系统启动后可运行 `python tools/verify_system.py` 检查 API 和演示页面。运行 `python tools/collect_feedback.py` 可将已复核的跌倒事件导出到本地反馈队列。
+
+图片检测所需的模型导出命令以及时序模型的训练和评估步骤见 [算法说明](algo/README.md)。

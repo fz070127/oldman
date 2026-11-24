@@ -1,0 +1,11 @@
+{
+  "name": "c2-val-tuned-moving-average",
+  "mode": "moving_average",
+  "threshold": 0.0191,
+  "window": 2,
+  "score_source": "algo/data/processed/c2/sequence_scores_dense.json",
+  "window_stride_frames": 3,
+  "window_length_frames": 30,
+  "note": "由 tune_consensus.py 在 val 上网格搜索得出；test 仅冻结后评估一次。同一冻结 ST-GCN 权重，仅改变滑窗步长与后处理，不重训、不覆盖 B 阶段产物。",
+  "acceptance_met": false
+}

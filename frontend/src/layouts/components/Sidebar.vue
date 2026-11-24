@@ -28,7 +28,7 @@
 import { Expand, Fold } from '@element-plus/icons-vue'
 import { useAppStore } from '@/stores/app'
 import { useUserStore } from '@/stores/user'
-import { asyncRoutes, isDynamicRoutesLoaded } from '@/router'
+import { asyncRoutes, demoRoute, imageDetectRoute, isDynamicRoutesLoaded } from '@/router'
 import SidebarItem from './SidebarItem.vue'
 
 const appStore = useAppStore()
@@ -50,7 +50,11 @@ const menuRoutes = computed(() => {
   void userStore.menus.length
   void isDynamicRoutesLoaded()
   const menuSet = new Set(userStore.menus)
-  return asyncRoutes.filter((r) => r.meta?.menuKey && menuSet.has(r.meta.menuKey) && !r.meta?.hidden)
+  const business = asyncRoutes.filter((r) => r.meta?.menuKey && menuSet.has(r.meta.menuKey) && !r.meta?.hidden)
+  if (!userStore.token) return business
+  return userStore.hasPermission('dashboard:read')
+    ? [...business, demoRoute, imageDetectRoute]
+    : [...business, demoRoute]
 })
 
 const activeMenu = computed(() => {

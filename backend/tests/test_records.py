@@ -208,6 +208,43 @@ async def records_app(records_server):
     return client, headers, factory
 
 
+async def test_system_management(records_app):
+    client, headers, _ = records_app
+    admin = headers["admin"]
+    denied = await client.get("/system/users", headers=headers["guardian01"])
+    assert denied.json()["code"] == 1003
+    guardians = await client.get("/system/guardians", headers=admin, params={"communityId": "C01"})
+    assert [item["id"] for item in guardians.json()["data"]["list"]] == ["G001"]
+
+    created = await client.post(
+        "/system/communities", headers=admin, json={"name": "测试社区", "address": "32 号"}
+    )
+    assert created.status_code == 201
+    community = created.json()["data"]["id"]
+    body = {
+        "username": "temporary_user",
+        "nickname": "测试用户",
+        "roleCode": RoleCode.VIEWER,
+        "communityId": community,
+    }
+    missing_password = await client.post("/system/users", headers=admin, json=body)
+    assert missing_password.json()["code"] == 1001
+    created = await client.post("/system/users", headers=admin, json={**body, "password": "test-local-123"})
+    assert created.status_code == 201
+    user = created.json()["data"]
+    assert user["communityName"] == "测试社区" and "password" not in user
+
+    updated = await client.put(f"/system/users/{user['id']}", headers=admin, json={"status": 2})
+    assert updated.json()["data"]["status"] == 2
+    users = await client.get("/system/users", headers=admin, params={"status": 2, "keyword": "temporary"})
+    assert [item["id"] for item in users.json()["data"]["list"]] == [user["id"]]
+
+    blocked = await client.delete(f"/system/communities/{community}", headers=admin)
+    assert blocked.json()["code"] == 1005
+    assert (await client.delete(f"/system/users/{user['id']}", headers=admin)).json()["code"] == 0
+    assert (await client.delete(f"/system/communities/{community}", headers=admin)).json()["code"] == 0
+
+
 async def test_mqtt_command_reply_and_timeout(records_server):
     app, _, _, factory = records_server
     mqtt = AsyncMock()

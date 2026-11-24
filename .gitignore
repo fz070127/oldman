@@ -12,6 +12,7 @@ research/
 algo/data/processed/*
 !algo/data/processed/evaluation_results.json
 algo/data/raw/
+algo/data/feedback/
 
 # ---------- Python ----------
 __pycache__/

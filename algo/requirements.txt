@@ -6,3 +6,6 @@ pyyaml
 imageio[ffmpeg]
 ultralytics>=8.3,<9
 torch>=2.2
+matplotlib
+onnx
+onnxruntime>=1.19,<2

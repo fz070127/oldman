@@ -83,3 +83,22 @@ python scripts/analyze_keypoints.py
 起始帧复核使用 `python scripts/preview.py --seq fall-01` 生成的原始画面视频。在 `reports/onset_review.csv` 填写 1 起帧号、观察依据和复核来源。`frame` 是开始失衡的第一帧，`lying_from` 是可明确观察到卧地且延续至片尾的抽样起帧。`review` 如实填写「人工逐帧复核」或「未人工逐帧复核」；边界不确定度写入 `uncertainty_frames`。取得人工复核登记许可后标记 `approved=1`，执行 `python scripts/annotate_onset.py --apply` 写回相应 `fall_onset`。冻结划分直接引用序列 ID。
 
 两份报告分别见 [关键点质量](reports/keypoint_quality.md) 和 [起始帧记录](reports/onset_annotation.md)。
+
+## 时序模型训练与导出
+
+以下命令从项目根目录执行。训练前需安装 `algo/requirements.txt` 并按上文准备关键点。
+
+```sh
+python algo/scripts/build_windows.py --train-stride 3 --post-margin 15
+python algo/scripts/train_stgcn.py --hidden 48 48 96 --lr 2e-4 --weight-decay 5e-4 --dropout 0.5 --pos-weight-cap 3 --epochs 250 --patience 40 --flip-augment
+python algo/scripts/train_lstm.py
+python algo/scripts/export_onnx.py --model pose
+python algo/scripts/export_onnx.py --model stgcn
+```
+
+`--scheduler plateau` 可用于两个训练脚本，按验证损失降低学习率。导出的 `yolov8n-pose.onnx` 和 `stgcn_static.onnx` 位于 `algo/data/processed/onnx/`。图片检测使用姿态模型提取关键点，使用 ST-GCN 提供可选的参考分。模型文件可由命令生成，部署读取方式见 [部署说明](../deploy/README.md)。
+
+- `split_dataset_721.py` 将 49/14/7 划分写到 `data/splits-721/`，可用 `build_windows.py --split-dir` 读取并另存窗口。
+- `evaluate_fusion.py`、`bench_models.py`、`cross_validate.py` 用于比较规则与模型融合、基准耗时和交叉验证。
+- `compare_pose_models.py` 对比姿态模型，候选模型与权重位置见 `configs/pose_compare.yaml`。运行 `extract_keypoints.py --model <权重文件名> --out <目录>` 可把候选模型的关键点输出到独立目录。
+- `dump_dense_scores.py` 生成稠密滑窗分数，`tune_consensus.py --config algo/data/processed/c2/consensus.local.json` 在验证集上定阈值，`evaluate_consensus.py --config algo/data/processed/c2/consensus.local.json` 独立复算；`compare_c_stages.py` 用于阶段对比。

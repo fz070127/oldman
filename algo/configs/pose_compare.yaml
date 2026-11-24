@@ -1,0 +1,30 @@
+# C1 姿态模型横评配置（仅准备，未执行）
+# 所有模型在同一 70 序列 cam0 RGB 上提取 17 点，比较关键点质量与推理速度。
+models:
+  - name: yolov8n-pose
+    source: local
+    weights: data/processed/weights/yolov8n-pose.pt
+    role: baseline
+  - name: yolov8s-pose
+    source: ultralytics
+    weights: data/processed/weights/yolov8s-pose.pt
+    role: candidate
+  - name: yolo11n-pose
+    source: ultralytics
+    weights: data/processed/weights/yolo11n-pose.pt
+    role: candidate
+
+dataset:
+  manifest: data/labels/ur_fall.csv
+  root: ../sumanpunshi/ur-fall-detection-dataset/versions/1/UR_data
+
+metrics:
+  - mean_keypoint_confidence
+  - shoulder_hip_four_point_confidence
+  - low_confidence_frame_rate
+  - ms_per_frame
+  - false_alarm_count_on_val_adl
+  - fall_detection_rate_on_val
+
+acceptance:
+  note: 不预先写死提升百分比；按实测结果选择，必须同时报告速度代价。

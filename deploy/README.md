@@ -19,6 +19,8 @@ bash scripts/init.sh
 
 如需家属端，在 `deploy/` 执行 `docker compose --profile h5 up -d --build h5`，然后访问 `http://localhost:8081`。当前 H5 的登录、告警和监护列表使用模拟数据。
 
+图片状态检测从 `algo/data/processed/onnx/` 读取权重。Compose 将该目录只读挂载到后端。按 [算法说明](../algo/README.md) 导出 `yolov8n-pose.onnx` 和可选的 `stgcn_static.onnx` 后，登录管理端即可从侧栏进入「图片状态检测」。
+
 ## 服务端口
 
 | 服务 | 宿主机端口 | 用途 |

@@ -93,6 +93,10 @@ services:
       - ESCALATE_TIME_SCALE
       - ESCALATE_POLL_INTERVAL_SEC
       - CORS_ORIGINS
+      - POSE_ONNX_PATH=/srv/models/onnx/yolov8n-pose.onnx
+      - STGCN_ONNX_PATH=/srv/models/onnx/stgcn_static.onnx
+    volumes:
+      - ../algo/data/processed/onnx:/srv/models/onnx:ro
     depends_on:
       postgres:
         condition: service_healthy

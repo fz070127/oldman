@@ -1,6 +1,7 @@
 """Edge fall agent. Run python agent.py --config config.yaml."""
 import argparse
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 import logging
 import math
 import signal
@@ -13,6 +14,7 @@ import yaml
 
 from detector_wrapper import Pose, StreamDetector
 from heartbeat import Heartbeat
+from monitor_client import post_record
 from mqtt_client import Publisher
 from rtsp_source import Source
 
@@ -24,6 +26,9 @@ def load_settings(path):
                          (cfg["detector"], "weights")):
         if section.get(key) is not None:
             section[key] = str((path.parent / section[key]).resolve())
+    stgcn = cfg["detector"].get("stgcn") or {}
+    if stgcn.get("weights") is not None:
+        stgcn["weights"] = str((path.parent / stgcn["weights"]).resolve())
     return cfg
 
 
@@ -35,16 +40,34 @@ def run(cfg, stride, stop):
             raise ValueError("heartbeat_sec and fps_fallback must be positive")
     source = Source(cfg, stride, stop)
     settings = cfg["detector"]
-    pose = Pose(Path(settings["weights"]), settings["cpu_threads"], settings["imgsz"])
+    pose = Pose(Path(settings["weights"]), settings["cpu_threads"], settings["imgsz"],
+                settings.get("device", "cpu"))
     publisher = Publisher(cfg["device_no"], cfg["mqtt"], cfg["store"])
     heartbeat = Heartbeat(publisher, cfg.get("heartbeat_sec", 30))
+    monitor = cfg.get("monitor") or {}
+    monitor_worker = ThreadPoolExecutor(max_workers=1) if monitor.get("url") else None
+    pending_monitor = None
+
+    def send_monitor(score, latency_ms, level):
+        try:
+            post_record(monitor["url"], monitor.get("token", ""), publisher.device,
+                        score, latency_ms, level)
+        except (OSError, ValueError) as error:
+            logging.warning("model monitor post failed: %s", error)
 
     def report(events, reason):
+        nonlocal pending_monitor
         for detection in events:
             evidence = detector.source_evidence(detection)
             occurred = next(stamp for frame, stamp in times if frame == evidence)
             event = detector.payload(detection, publisher.device, cfg["elder_id"], occurred)
             publisher.report(event)
+            if (monitor_worker is not None and "model_prob" in detection
+                    and (pending_monitor is None or pending_monitor.done())):
+                latency_ms = max(0.0, (time.time() - occurred) * 1000)
+                pending_monitor = monitor_worker.submit(
+                    send_monitor, detection["model_prob"], latency_ms, event["level"],
+                )
             logging.info("detection evidence=%d emit=%d reason=%s eventId=%s",
                          evidence, index, reason, event["eventId"])
 
@@ -82,6 +105,8 @@ def run(cfg, stride, stop):
     finally:
         heartbeat.close()
         publisher.close()
+        if monitor_worker is not None:
+            monitor_worker.shutdown()
 
 
 def main():

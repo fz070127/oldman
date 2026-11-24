@@ -16,10 +16,14 @@ import numpy as np
 
 from ur_manifest import ALGO, indexed_frames, read_manifest, staged_output
 
-OUT = ALGO / "data/processed/keypoints"
-MODEL = "yolov8n-pose.pt"
-WEIGHTS = OUT.parent / "weights" / MODEL
-WEIGHTS_SHA256 = "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212"
+DEFAULT_OUT = ALGO / "data/processed/keypoints"
+DEFAULT_MODEL = "yolov8n-pose.pt"
+DEFAULT_WEIGHTS = ALGO / "data/processed/weights" / DEFAULT_MODEL
+DEFAULT_SHA256 = "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212"
+OUT = DEFAULT_OUT
+MODEL = DEFAULT_MODEL
+WEIGHTS = DEFAULT_WEIGHTS
+WEIGHTS_SHA256 = DEFAULT_SHA256
 CONF = 0.25
 SCHEMA = {
     "frames": ((), "int32"),
@@ -32,6 +36,13 @@ SCHEMA = {
 META = np.dtype([("seq_id", "U8"), ("model", "U32"), ("imgsz", "i4"),
                  ("conf_thres", "f4"), ("fps_assumed", "i4"), ("extracted_at", "U40")])
 _pose = None
+
+
+def configure(out, weights, model, sha256=None):
+    global OUT, WEIGHTS, MODEL, WEIGHTS_SHA256, _pose
+    OUT, WEIGHTS, MODEL = Path(out), Path(weights), model
+    WEIGHTS_SHA256 = sha256
+    _pose = None
 
 
 def sequence_frames(row):
@@ -125,12 +136,19 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--limit", type=int)
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--model", default=DEFAULT_MODEL, help="pose weights filename")
+    parser.add_argument("--weights", type=Path, help="full path to pose weights")
+    parser.add_argument("--out", type=Path, default=DEFAULT_OUT, help="keypoints output dir")
+    parser.add_argument("--sha256", help="expected sha256 for the weights file")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--resume", action="store_true")
     mode.add_argument("--verify", action="store_true")
     args = parser.parse_args()
     if args.workers < 1 or (args.limit is not None and args.limit < 1):
         parser.error("workers 和 limit 须为正整数")
+    weights = args.weights or (ALGO / "data/processed/weights" / args.model)
+    sha256 = args.sha256 or (DEFAULT_SHA256 if args.model == DEFAULT_MODEL else None)
+    configure(args.out, weights, args.model, sha256)
     start = time.perf_counter()
     rows = list(read_manifest().values())[:args.limit]
     jobs = []
@@ -154,17 +172,22 @@ def main():
         print(f"{len(rows)} sequences already verified")
         return
     if not WEIGHTS.exists():
+        if args.model != DEFAULT_MODEL:
+            raise FileNotFoundError(f"自定义权重需预先下载: {WEIGHTS}")
         url = "https://github.com/ultralytics/assets/releases/download/v8.3.0/" + MODEL
+        WEIGHTS.parent.mkdir(parents=True, exist_ok=True)
         with staged_output(WEIGHTS) as tmp:
             urlretrieve(url, tmp)
             if hashlib.sha256(tmp.read_bytes()).hexdigest() != WEIGHTS_SHA256:
                 raise ValueError(f"下载的模型校验失败: {url}")
-    elif hashlib.sha256(WEIGHTS.read_bytes()).hexdigest() != WEIGHTS_SHA256:
+    elif WEIGHTS_SHA256 and hashlib.sha256(WEIGHTS.read_bytes()).hexdigest() != WEIGHTS_SHA256:
         raise ValueError(f"模型文件校验失败: {WEIGHTS}")
     if args.workers == 1:
         count = sum(map(extract, jobs))
     else:
-        with ProcessPoolExecutor(args.workers) as pool:
+        with ProcessPoolExecutor(
+            args.workers, initializer=configure, initargs=(OUT, WEIGHTS, MODEL, WEIGHTS_SHA256)
+        ) as pool:
             count = sum(pool.map(extract, jobs))
     elapsed = time.perf_counter() - start
     timing = dict(sequences=len(jobs), frames=count, workers=args.workers,

@@ -124,7 +124,7 @@ async def test_business_openapi_declares_response_payloads(service):
         if path.startswith("/api/v1/")
         for route in methods.values()
     ]
-    assert len(operations) == 36
+    assert len(operations) == 51
     for operation in operations:
         outcome = operation["responses"].get("201") or operation["responses"]["200"]
         fields = resolve(outcome["content"]["application/json"]["schema"])["properties"]

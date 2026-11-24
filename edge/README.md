@@ -176,4 +176,12 @@ python tools/benchmark.py video --mqtt-host localhost --downsample 2
 
 Agent 的平均 CPU 低于 80%；整机瞬时负载曾超出 80%。全帧运行速度低于源帧率，文件播放积压计入上述墙钟时延。实物 RTSP、USB 和 RK3588 的吞吐、端到端时延仍待现场采集。
 
+## ST-GCN 验证与模型监控
+
+`config.yaml` 中的 `detector.stgcn.enabled` 默认关闭。准备训练权重、校准阈值并完成验证后可手动开启。模型使用连续 30 帧，启用时将 `downsample` 设为 1。姿态推理设备可通过 `detector.device` 选择。
+
+`detector.consensus` 对模型主动触发路径使用连续多窗均分，规则事件的模型确认采用单窗重评分。桌面版 C2 参数降低误报时也降低了检出，启用前用当前权重和数据重新标定。可运行 `python tools/verify_c2.py` 检查配置和触发逻辑。
+
+配置 `monitor.url` 和有 `model-monitor:record` 权限的令牌后，边缘端会异步上报模型分数及从证据画面到发报的耗时。拥有 `dashboard:read` 的账号可查询快照，配置基线与清空记录需要 `model-monitor:write` 权限。监控数据保留在服务内存中。
+
 断开真实 broker 后，五台 mock 设备各积压 4 条、共 20 条。重启 broker，20 条均按各设备的入库顺序送达，逐条比对 ID 和完整 JSON 一致，SQLite 均由 0 变 1。另在默认 fall-01 MP4 播放中停 broker，终端记录“本地已报警”，ID `73e4bf62-87ae-48d6-b659-1def421e212c` 先以 0 入库；恢复后订阅端收到原 payload，PUBACK 后置 1。该 payload 已通过 M5 的 `IngestPayload.model_validate_json`。独立冷启动试验中，新 Publisher 打开原数据库也送达了原 ID。连续插入 1001 条时淘汰最旧一条、保留 1000 条。五设备 mock 和单设备真实 UR Fall RGB 模式均已由订阅端验收。

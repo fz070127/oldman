@@ -18,7 +18,7 @@ export function getSystemUsers(
 }
 
 /** 新增系统用户 */
-export function createSystemUser(data: Partial<SystemUser>) {
+export function createSystemUser(data: Partial<SystemUser> & { password: string }) {
   return request<SystemUser>({ url: '/system/users', method: 'post', data })
 }
 

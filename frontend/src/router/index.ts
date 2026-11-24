@@ -6,8 +6,10 @@ import {
   House,
   Monitor,
   Odometer,
+  Picture,
   Setting,
   User,
+  VideoCamera,
   Warning,
 } from '@element-plus/icons-vue'
 import DefaultLayout from '@/layouts/DefaultLayout.vue'
@@ -113,6 +115,22 @@ export const asyncRoutes: RouteRecordRaw[] = [
   },
 ]
 
+/** 前端演示路由：不依赖后端菜单，登录后即可从侧栏进入 */
+export const demoRoute: RouteRecordRaw = {
+  path: 'demo/detect',
+  name: 'DemoDetect',
+  component: () => import('@/views/demo/detect.vue'),
+  meta: { title: '跌倒检测演示', icon: markRaw(VideoCamera), menuKey: 'demo' },
+}
+
+/** 真实推理演示：上传图片，用数据集标定的规则与模型判断人体状态 */
+export const imageDetectRoute: RouteRecordRaw = {
+  path: 'demo/image-detect',
+  name: 'DemoImageDetect',
+  component: () => import('@/views/demo/image-detect.vue'),
+  meta: { title: '图片状态检测', icon: markRaw(Picture), menuKey: 'demo', permission: 'dashboard:read' },
+}
+
 /** 静态公共路由（无需权限过滤，始终存在） */
 export const constantRoutes: RouteRecordRaw[] = [
   {
@@ -143,7 +161,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: '/',
     name: 'Layout',
     component: DefaultLayout,
-    children: [],
+    children: [demoRoute, imageDetectRoute],
   },
 ]
 

@@ -96,6 +96,9 @@
             maxlength="24"
           />
         </el-form-item>
+        <el-form-item v-if="!editingId" label="初始密码" prop="password">
+          <el-input v-model="form.password" type="password" show-password autocomplete="new-password" />
+        </el-form-item>
         <el-form-item label="用户昵称" prop="nickname">
           <el-input v-model.trim="form.nickname" placeholder="请输入姓名或昵称" maxlength="32" />
         </el-form-item>
@@ -134,6 +137,7 @@ import { Plus } from '@element-plus/icons-vue'
 import {
   createSystemUser,
   deleteSystemUser,
+  getSystemCommunities,
   getSystemUsers,
   updateSystemUser,
 } from '@/api/system'
@@ -146,13 +150,24 @@ import { formatDateTime } from '@/utils/time'
 
 const tableRef = ref<ProTableInstance<SystemUser>>()
 
-const communityOptions = [
-  { id: 'C01', name: '幸福里社区' },
-  { id: 'C02', name: '康乐苑社区' },
-  { id: 'C03', name: '阳光花园社区' },
-  { id: 'C04', name: '翠竹园社区' },
-  { id: 'C05', name: '长青新村社区' },
-]
+const communityOptions = ref<{ id: string; name: string }[]>([])
+
+async function loadCommunities() {
+  const pageSize = 100
+  const rows = []
+  let page = 1
+  let total = 1
+  while (rows.length < total) {
+    const res = await getSystemCommunities({ page, pageSize })
+    rows.push(...res.list)
+    if (res.list.length === 0) break
+    total = res.total
+    page += 1
+  }
+  communityOptions.value = rows.map(({ id, name }) => ({ id, name }))
+}
+
+onMounted(() => { void loadCommunities().catch(() => {}) })
 
 const searchParams = reactive({
   keyword: '',
@@ -194,43 +209,57 @@ const formRef = ref<FormInstance>()
 
 const form = reactive({
   username: '',
+  password: '',
   nickname: '',
   phone: '',
   roleCode: RoleCode.GUARDIAN as RoleCode,
-  communityId: 'C01',
+  communityId: '',
 })
 
 const rules: FormRules = {
   username: [
     { required: true, message: '请输入登录账号', trigger: 'blur' },
-    { min: 3, max: 24, message: '账号长度需在 3-24 位之间', trigger: 'blur' },
+    { pattern: /^[A-Za-z0-9_]{3,24}$/, message: '请输入 3～24 位字母、数字或下划线', trigger: 'blur' },
+  ],
+  password: [
+    { required: true, message: '请输入初始密码', trigger: 'blur' },
+    {
+      validator: (_rule, value: string, callback: (error?: Error) => void) => {
+        if (value.length < 8 || new TextEncoder().encode(value).length > 72) {
+          callback(new Error('初始密码至少 8 个字符，最多 72 字节'))
+          return
+        }
+        callback()
+      },
+      trigger: 'blur',
+    },
   ],
   nickname: [{ required: true, message: '请输入用户昵称', trigger: 'blur' }],
   phone: [
-    { required: true, message: '请输入手机号码', trigger: 'blur' },
     { pattern: /^1\d{10}$/, message: '请输入以 1 开头的 11 位手机号', trigger: 'blur' },
   ],
   roleCode: [{ required: true, message: '请选择角色', trigger: 'change' }],
-  communityId: [{ required: true, message: '请选择所属社区', trigger: 'change' }],
 }
 
 function openCreate() {
   editingId.value = ''
   form.username = ''
+  form.password = ''
   form.nickname = ''
   form.phone = ''
   form.roleCode = RoleCode.GUARDIAN
-  form.communityId = 'C01'
+  form.communityId = ''
   dialogVisible.value = true
 }
 
 function openEdit(row: SystemUser) {
   editingId.value = row.id
   form.username = row.username
+  form.password = ''
   form.nickname = row.nickname
-  form.phone = row.phone
+  form.phone = row.phone ?? ''
   form.roleCode = row.roleCode
-  form.communityId = row.communityId
+  form.communityId = row.communityId ?? ''
   dialogVisible.value = true
 }
 
@@ -241,13 +270,20 @@ async function submitForm() {
 
   submitting.value = true
   try {
+    const fields = {
+      nickname: form.nickname,
+      phone: form.phone || undefined,
+      roleCode: form.roleCode,
+      communityId: form.communityId || undefined,
+    }
     if (editingId.value) {
-      await updateSystemUser(editingId.value, { ...form })
+      await updateSystemUser(editingId.value, fields)
       ElMessage.success('用户信息已更新')
     } else {
-      await createSystemUser({ ...form })
+      await createSystemUser({ ...fields, username: form.username, password: form.password })
       ElMessage.success('新建用户成功')
     }
+    form.password = ''
     dialogVisible.value = false
     tableRef.value?.reload(false)
   } finally {

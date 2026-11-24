@@ -13,9 +13,33 @@ mqtt:
   topic_prefix: edge
 store: .cache/EDGE-0001.sqlite3
 heartbeat_sec: 30
+# 可选：上报模型分数与发报延迟到后端 /api/v1/model-monitor/record
+# 删除本节则不上报。token 取登录接口返回的 accessToken。
+# monitor:
+#   url: http://localhost:8000/api/v1/model-monitor/record
+#   token: ""
 detector:
   rules: ../algo/configs/detector.yaml
   weights: ../algo/data/processed/weights/yolov8n-pose.pt
   motion_window_sec: 2.0
   cpu_threads: 4
   imgsz: 640
+  # 推理设备：cpu 或 cuda:0（有 NVIDIA GPU 且安装 cu128 版 torch 时可切换）
+  device: cpu
+  # ST-GCN 二次确认（B5/B6 融合结论）：模型滑窗触发 P1，规则 ±45 帧内确认升 P0；
+  # 删除本节则退回纯规则模式。threshold 为 B6 冻结的 val 校准阈值。
+  stgcn:
+    enabled: false
+    weights: ../algo/data/processed/stgcn/best.pt
+    threshold: 0.0191
+    device: cpu
+  # C2 多窗共识：只作用于「模型主动触发 P1」路径，规则门控升 P0 路径保持 B6 不变。
+  # 必须与 algo/configs/consensus.json 的 threshold/window 一致；
+  # score_stride_frames 对应 dump_dense_scores.py 的 --stride。
+  # 删除本节或置 enabled: false 即退回 B6 单窗越阈。
+  consensus:
+    enabled: true
+    mode: moving_average
+    threshold: 0.0191
+    window: 2
+    score_stride_frames: 3
